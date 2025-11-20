@@ -1,0 +1,231 @@
+= Llenguatges SQL: DDL
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+
+<<<
+
+== Solucions activitat creació de taules
+
+=== Protectora d'animals
+
+[source,sql]
+----
+CREATE TABLE Vaccines (
+  VaccineId INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  Name VARCHAR(80) NOT NULL UNIQUE
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+----
+
+[source,sql]
+----
+CREATE TABLE Diseases (
+  DiseaseId INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  Name VARCHAR(80) NOT NULL UNIQUE
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+----
+
+[source,sql]
+----
+CREATE TABLE Addresses (
+  AddressId INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  AddressLine1 VARCHAR(100) NOT NULL,
+  AddressLine2 VARCHAR(100) NOT NULL DEFAULT '',
+  City VARCHAR(80) NOT NULL,
+  ZipCode CHAR(5) NOT NULL,
+  Province VARCHAR(30) NOT NULL,
+  Country VARCHAR(40) NOT NULL DEFAULT 'Espanya'
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+----
+
+[source,sql]
+----
+CREATE TABLE TimePeriods (
+  TimePeriodId INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  DayOfWeek ENUM('Dilluns','Dimarts','Dimecres','Dijous','Divendres','Dissabte','Diumenge') NOT NULL,
+  StartTime TIME NOT NULL,
+  EndTime TIME NOT NULL
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+----
+
+[source,sql]
+----
+CREATE TABLE Collaborators (
+  DNI CHAR(9) PRIMARY KEY,
+  FirstName VARCHAR(70) NOT NULL,
+  LastName VARCHAR(70) NOT NULL,
+  Email VARCHAR(80) NOT NULL DEFAULT '',
+  PhoneNumber VARCHAR(11) NOT NULL,
+  AddressId INT UNSIGNED NOT NULL,
+  CONSTRAINT fkCollaboratorsAddresses FOREIGN KEY (AddressId)
+    REFERENCES Addresses(AddressId)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+----
+
+[source,sql]
+----
+CREATE TABLE Donations (
+  CollaboratorDNI CHAR(9) NOT NULL,
+  DateTime DATETIME NOT NULL,
+  Quantity NUMERIC(6, 2) NOT NULL,
+  Recurring BOOLEAN NOT NULL DEFAULT FALSE,
+  CONSTRAINT pkDonations PRIMARY KEY (CollaboratorDNI, DateTime),
+  CONSTRAINT fkDonationsCollaborators FOREIGN KEY (CollaboratorDNI)
+    REFERENCES Collaborators(DNI)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+----
+
+[source,sql]
+----
+CREATE TABLE Disponibility (
+  TimePeriodId INT UNSIGNED NOT NULL,
+  CollaboratorDNI CHAR(9) NOT NULL,
+  CONSTRAINT pkDisponibility PRIMARY KEY (TimePeriodId, CollaboratorDNI),
+  CONSTRAINT fkDisponibilityTimePeriods FOREIGN KEY (TimePeriodId)
+    REFERENCES TimePeriods(TimePeriodId)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fkDisponibilityCollaborator FOREIGN KEY (CollaboratorDNI)
+    REFERENCES Collaborators(DNI)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+----
+
+[source,sql]
+----
+CREATE TABLE FosterHouses (
+  Name VARCHAR(80) PRIMARY KEY,
+  Type ENUM('Acollida', 'Colònia') NOT NULL,
+  CollaboratorDNI CHAR(9) NOT NULL,
+  AddressId INT UNSIGNED NOT NULL,
+  CONSTRAINT fkFosterHousesCollaborators FOREIGN KEY (CollaboratorDNI)
+    REFERENCES Collaborators(DNI)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE,
+  CONSTRAINT fkFosterHousesAddresses FOREIGN KEY (AddressId)
+    REFERENCES Addresses(AddressId)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+----
+
+[source,sql]
+----
+CREATE TABLE Animals (
+  Name VARCHAR(30) PRIMARY KEY,
+  Race VARCHAR(30) NOT NULL,
+  Sex ENUM("M","F") NOT NULL,
+  Size ENUM ("Petit", "Mitjà", "Gran") NOT NULL,
+  Species VARCHAR(40) NOT NULL,
+  Birthdate DATE NOT NULL,
+  Description TEXT,
+  ArrivalDate DATE NOT NULL,
+  Sterilized BOOLEAN NOT NULL DEFAULT FALSE,
+  Chip BOOLEAN NOT NULL DEFAULT FALSE,
+  AdopterDNI CHAR(9) DEFAULT NULL,
+  AdoptionDate DATE DEFAULT NULL,
+  FosterHouseName VARCHAR(80) DEFAULT NULL,
+  CONSTRAINT fkAnimalsCollaborator FOREIGN KEY (AdopterDNI)
+    REFERENCES Collaborators(DNI)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE,
+  CONSTRAINT fkAnimalsFosterHouse FOREIGN KEY (FosterHouseName)
+    REFERENCES FosterHouses(Name)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+----
+
+[source,sql]
+----
+CREATE TABLE AnimalVaccines (
+  AnimalName VARCHAR(30) NOT NULL,
+  VaccineId INT UNSIGNED NOT NULL,
+  Date DATE NOT NULL,
+  CONSTRAINT pkAnimalVaccines PRIMARY KEY (AnimalName, VaccineId),
+  CONSTRAINT fkAnimalVaccinesAnimal FOREIGN KEY (AnimalName)
+    REFERENCES Animals(Name)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fkAnimalVaccinesVaccines FOREIGN KEY (VaccineId)
+    REFERENCES Vaccines(VaccineId)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+----
+
+[source,sql]
+----
+CREATE TABLE Interventions (
+  AnimalName VARCHAR(30) NOT NULL,
+  DateTime DATETIME NOT NULL,
+  Type VARCHAR(30) NOT NULL,
+  Description TEXT,
+  CONSTRAINT pkInterventions PRIMARY KEY (AnimalName, DateTime),
+  CONSTRAINT fkInterventionsAnimals FOREIGN KEY (AnimalName)
+    REFERENCES Animals(Name)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+----
+
+[source,sql]
+----
+CREATE TABLE AnimalDisease (
+  AnimalName VARCHAR(30),
+  DiseaseId INT UNSIGNED,
+  CONSTRAINT pkAnimalDisease PRIMARY KEY (AnimalName, DiseaseId),
+  CONSTRAINT fkAnimalDiseaseAnimal FOREIGN KEY (AnimalName)
+    REFERENCES Animals(Name)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fkAnimalDiseaseDisease FOREIGN KEY (DiseaseId)
+    REFERENCES Diseases(DiseaseId)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+----
+
+[source,sql]
+----
+CREATE TABLE Patrons (
+  DNI CHAR(9) PRIMARY KEY,
+  IBAN VARCHAR(34) NOT NULL,
+  Owner VARCHAR(60) NOT NULL,
+  Bank VARCHAR(60) NOT NULL,
+  AccountNumber CHAR(20),
+  CONSTRAINT fkPatronsCollaborators FOREIGN KEY (DNI)
+    REFERENCES Collaborators(DNI)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+----
+
+[source,sql]
+----
+CREATE TABLE Patronize (
+  DNI CHAR(9) NOT NULL,
+  AnimalName VARCHAR(30) NOT NULL,
+  StartDate DATE NOT NULL,
+  Quantity NUMERIC(6,2) UNSIGNED NOT NULL,
+  Periodicity ENUM('Mensual', 'Semestral', 'Anual') NOT NULL,
+  EndDate DATE DEFAULT NULL,
+  CONSTRAINT pkPatronize PRIMARY KEY (DNI, AnimalName, StartDate),
+  CONSTRAINT fkPatronizePatron FOREIGN KEY (DNI)
+    REFERENCES Patrons(DNI)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fkPatronizeAnimals FOREIGN KEY (AnimalName)
+    REFERENCES Animals(Name)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
+----

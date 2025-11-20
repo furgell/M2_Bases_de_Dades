@@ -1,0 +1,506 @@
+= Activitat: Modificació de dades
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+<<<
+
+== Solució amb claus autogenerades
+
+=== Insercions
+
+1. Afegeix-te com a client a la botiga. No cal que posis dades reals, a part del
+teu nom i cognom, però has d'omplir correctament tots els camps.
++
+[source,sql]
+----
+INSERT INTO Customer(FirstName, LastName, Company, Address, City, State,
+Country, PostalCode, Phone, Fax, Email, SupportRepId) VALUES
+('Nom', 'Cognom', 'Empresa', 'Adreça', 'Ciutat', 'Província' , 'País',
+'CPostal', 'Telèfon', 'Fax', 'Email',
+  (SELECT EmployeeId FROM Employee WHERE Title LIKE 'Sales Support Agent' LIMIT 1));
+----
+
+2. Volem introduir un nou artista i algun dels seus àlbums a la base de dades.
++
+L'artista es diu *M.I.A.* i l'àlbum que volem introduir és *Kala*. Pots
+consultar la llista de les cançons a
+https://en.wikipedia.org/wiki/Kala_%28album%29.
++
+[source,sql]
+----
+INSERT INTO Artist(Name) VALUES ('M.I.A.');
+INSERT INTO Album(Title, ArtistId) VALUES ('Kala', LAST_INSERT_ID());
+SELECT @mediaTypeId:=MediaTypeId FROM MediaType WHERE Name LIKE 'MPEG audio file';
+SELECT @genreId:=GenreId FROM Genre WHERE Name LIKE 'Hip Hop/Rap';
+INSERT INTO Track(Name, AlbumId, MediaTypeId, GenreId, Composer, Milliseconds, UnitPrice) VALUES
+  ('Bamboo banga', LAST_INSERT_ID(), @mediaTypeId, @genreId, 'M.I.A., Switch, Jonathan Richman, Ilaiyaraaja', TIME_TO_SEC('00:04:58')*1000, 0.99),
+  ('Bird Flu', LAST_INSERT_ID(), @mediaTypeId, @genreId, 'M.I.A., Switch, R. P. Patnaik', TIME_TO_SEC('00:03:24')*1000, 0.99),
+  ('Boyz', LAST_INSERT_ID(), @mediaTypeId, @genreId, 'M.I.A., Switch', TIME_TO_SEC('00:03:27')*1000, 0.99);
+----
+
+3. Crea una nova llista de reproducció i afegeix-hi almenys 5 cançons (que ja
+estiguin a la base de dades).
++
+[source,sql]
+----
+INSERT INTO Playlist(Name) VALUES ('NewPlaylist');
+
+INSERT INTO PlaylistTrack VALUES
+  (LAST_INSERT_ID(), 5),
+  (LAST_INSERT_ID(), 15),
+  (LAST_INSERT_ID(), 20),
+  (LAST_INSERT_ID(), 25),
+  (LAST_INSERT_ID(), 30);
+----
+
+4. El client *Niklas Schröder* ha fet una nova compra a la nostra botiga. Ha
+adquirit dos exemplars de la cançó *Losing My Religion* i un exemplar de la
+cançó *Heartland*. Introdueix les dades corresponents a les taules *Invoice* i
+*InvoiceLine*, suposant que ha facturat a la seva adreça habitual.
++
+[source,sql]
+----
+INSERT INTO Invoice
+  SELECT NULL, CustomerId, DATE(NOW()), Address, City, State, Country, PostalCode, 0
+  FROM Customer
+  WHERE FirstName LIKE 'Niklas' AND LastName LIKE 'Schröder';
+
+SELECT @invoiceId:=LAST_INSERT_ID();
+
+INSERT INTO InvoiceLine
+  SELECT NULL, @invoiceId, TrackId, UnitPrice, 2
+  FROM Track
+  WHERE Name Like 'Losing My Religion';
+
+INSERT INTO InvoiceLine
+  SELECT NULL, @invoiceId, TrackId, UnitPrice, 1
+  FROM Track
+  WHERE Name Like 'Heartland';
+
+UPDATE Invoice SET Total = (
+  SELECT SUM(UnitPrice*Quantity)
+   FROM InvoiceLine
+   WHERE InvoiceId=@invoiceId
+) WHERE InvoiceId=@invoiceId;
+----
+
+5. Hem contractat al client *John Gordon*. El càrrec que ocuparà serà el de
+*Sales Manager* i el seu cap serà la *Nancy Edwards*.
++
+Afegeix una nova fila a la taula d'empleats, copiant totes les dades
+possibles de la taula de clients.
++
+[source,sql]
+----
+SELECT @reportsTo:=EmployeeId
+ FROM Employee
+ WHERE LastName LIKE 'Edwards' AND FirstName LIKE 'Nancy';
+
+INSERT INTO Employee
+  SELECT NULL, LastName, FirstName, 'Sales Manager', @reportsTo, '1990-04-29',
+   DATE(NOW()), Address, City, State, Country, PostalCode, Phone, Fax, Email
+  FROM Customer
+  WHERE FirstName LIKE 'John' AND LastName LIKE 'Gordon';
+----
+
+=== Actualitzacions
+
+1. El client *Mark Taylor* s'ha canviat d'adreça. Ara viu a
+*68-70 Oxford St, Darlinghurst NSW 2010, Australia*. Modifica la seva entrada
+a la base de dades d'acord amb aquest canvi.
++
+[source,sql]
+----
+UPDATE Customer
+ SET Address='68-70 Oxford Street', State='NSW', PostalCode='2010', Country='Australia'
+ WHERE FirstName LIKE 'Mark' AND LastName LIKE 'Taylor';
+----
+
+2. Disminueix un 20% els preus de les 30 cançons més curtes de la base de dades.
++
+[source,sql]
+----
+UPDATE Track
+ SET UnitPrice = 0.8*UnitPrice
+ WHERE TrackId IN (
+   SELECT * FROM (
+     SELECT TrackId
+      FROM Track
+      ORDER BY Milliseconds
+      LIMIT 30
+    ) AS t
+ );
+----
+
+3. Augmenta un 15% els preus de les 20 cançons més venudes de la base de dades.
++
+[source,sql]
+----
+UPDATE Track
+ SET UnitPrice = 1.15*UnitPrice
+ WHERE TrackId IN (
+   SELECT * FROM (
+     SELECT TrackId
+      FROM InvoiceLine
+      GROUP BY TrackId
+      ORDER BY SUM(Quantity) DESC
+      LIMIT 20
+   ) AS t
+ );
+----
+
+4. Fins ara, els clients de la Índia tenien com a assistent a l'empleada *Jane
+Peacock*, però a partir d'ara tindran a la *Margaret Park*. Fes el canvi
+corresponent a la base de dades.
++
+[source,sql]
+----
+UPDATE Customer
+ SET SupportRepId = (
+   SELECT EmployeeId
+    FROM Employee
+    WHERE LastName LIKE 'Park' AND FirstName LIKE 'Margaret'
+ ) WHERE Country LIKE 'India';
+----
+
+5. El client *Eduardo Martins* s'ha queixat d'un error a la seva última factura.
+A més de les cançons que hi consten, assegura que també va comprar un exemplar
+de la cançó *Garota De Ipanema*. Modifica la seva última factura per afegir
+aquesta compra.
++
+[source,sql]
+----
+SELECT @invoiceId:=InvoiceId, @customerId:=Customer.CustomerId
+ FROM Invoice
+ JOIN Customer ON Invoice.CustomerId=Customer.CustomerId
+ WHERE FirstName LIKE 'Eduardo' AND LastName LIKE 'Martins'
+ ORDER BY InvoiceDate DESC
+ LIMIT 1;
+
+INSERT INTO InvoiceLine
+ SELECT NULL, @invoiceId, TrackId, UnitPrice, 1
+  FROM Track
+  WHERE Name LIKE 'Garota De Ipanema'
+  LIMIT 1;
+
+UPDATE Invoice
+ SET Total=(
+   SELECT SUM(UnitPrice*Quantity)
+    FROM InvoiceLine
+    WHERE InvoiceId = @invoiceId
+ ) WHERE InvoiceId = @invoiceId;
+----
+
+=== Eliminacions
+
+1. Un error ha fet que totes les factures emeses el dia 28 de gener de 2013
+siguin errònies: es van guardar a la base de dades, però no es van cobrar ni es
+van entregar les cançons.
++
+Elimina totes les factures emeses aquest dia.
+
+[source,sql]
+----
+DELETE FROM InvoiceLine
+ WHERE InvoiceId IN (
+   SELECT InvoiceId
+    FROM Invoice
+    WHERE DATE(InvoiceDate) = '2013-01-28'
+ );
+
+DELETE FROM Invoice
+ WHERE DATE(InvoiceDate) = '2013-01-28';
+----
+
+2. Sembla que hi ha dues llistes de reproducció repetides a la base de dades.
+Són les que tenen com a nom *Music*. Elimina una de les dues llistes de
+reproducció completament.
+
+[source,sql]
+----
+DELETE FROM PlaylistTrack
+ WHERE PlaylistId = (
+   SELECT @playlistId:=PlaylistId
+    FROM Playlist
+    WHERE Name LIKE 'Music'
+    LIMIT 1
+ );
+
+DELETE FROM Playlist
+ WHERE PlaylistId = @playlistId;
+----
+
+3. Esborra totes les cançons de la base de dades que no s'hagin venut cap
+vegada fins ara.
+
+[source,sql]
+----
+DELETE FROM PlaylistTrack
+WHERE TrackId NOT IN (
+	SELECT TrackId
+	FROM InvoiceLine);
+
+DELETE FROM Track
+WHERE TrackId NOT IN (
+	SELECT TrackId
+	FROM InvoiceLine);
+----
+
+== Solució sense claus autogenerades
+
+=== Insercions
+
+1. Afegeix-te com a client a la botiga. No cal que posis dades reals, a part del
+teu nom i cognom, però has d'omplir correctament tots els camps.
++
+[source,sql]
+----
+INSERT INTO Customer
+  SELECT MAX(CustomerId)+1, 'Nom', 'Cognom', 'Empresa', 'Adreça', 'Ciutat',
+    'Província' , 'País', 'CPostal', 'Telèfon', 'Fax', 'Email', EmployeeId
+  FROM Customer, Employee
+  WHERE Title LIKE 'Sales Support Agent';
+----
+
+2. Volem introduir un nou artista i algun dels seus àlbums a la base de dades.
++
+L'artista es diu *M.I.A.* i l'àlbum que volem introduir és *Kala*. Pots
+consultar la llista de les cançons a
+https://en.wikipedia.org/wiki/Kala_%28album%29.
++
+[source,sql]
+----
+INSERT INTO Artist
+  SELECT @artistId:=MAX(ArtistId)+1, 'M.I.A.'
+  FROM Artist;
+
+INSERT INTO Album
+  SELECT @albumId:=MAX(AlbumId)+1, 'Kala', @artistId
+  FROM Album;
+
+SELECT @trackId:=MAX(TrackId)+1 FROM Track;
+SELECT @mediaTypeId:=MediaTypeId FROM MediaType WHERE Name LIKE 'MPEG audio file';
+SELECT @genreId:=GenreId FROM Genre WHERE Name LIKE 'Hip Hop/Rap';
+
+INSERT INTO Track VALUES
+  (@trackId, 'Bamboo banga', @albumId, @mediaTypeId, @genreId, 'M.I.A., Switch, Jonathan Richman, Ilaiyaraaja', TIME_TO_SEC('00:04:58')*1000, NULL, 0.99),
+  (@trackId+1, 'Bird Flu', @albumId, @mediaTypeId, @genreId, 'M.I.A., Switch, R. P. Patnaik', TIME_TO_SEC('00:03:24')*1000, NULL, 0.99),
+  (@trackId+2, 'Boyz', @albumId, @mediaTypeId, @genreId, 'M.I.A., Switch', TIME_TO_SEC('00:03:27')*1000, NULL, 0.99);
+----
+
+3. Crea una nova llista de reproducció i afegeix-hi almenys 5 cançons (que ja
+estiguin a la base de dades).
++
+[source,sql]
+----
+SELECT @playlistId:=MAX(PlaylistId)+1 FROM Playlist;
+
+INSERT INTO Playlist VALUES (@playlistId, 'NewPlaylist');
+
+INSERT INTO PlaylistTrack VALUES
+  (@playlistId, 5),
+  (@playlistId, 15),
+  (@playlistId, 20),
+  (@playlistId, 25),
+  (@playlistId, 30);
+----
+
+4. El client *Niklas Schröder* ha fet una nova compra a la nostra botiga. Ha
+adquirit dos exemplars de la cançó *Losing My Religion* i un exemplar de la
+cançó *Heartland*. Introdueix les dades corresponents a les taules *Invoice* i
+*InvoiceLine*, suposant que ha facturat a la seva adreça habitual.
++
+[source,sql]
+----
+SELECT @invoiceId:=MAX(InvoiceId)+1 FROM Invoice;
+SELECT @invoiceLineId:=MAX(InvoiceLineId)+1 FROM InvoiceLine;
+
+INSERT INTO Invoice
+  SELECT @invoiceId, CustomerId, DATE(NOW()), Address, City, State, Country, PostalCode, 0
+  FROM Customer
+  WHERE FirstName LIKE 'Niklas' AND LastName LIKE 'Schröder';
+
+INSERT INTO InvoiceLine
+  SELECT @invoiceLineId, @invoiceId, TrackId, UnitPrice, 2
+  FROM Track
+  WHERE Name Like 'Losing My Religion';
+
+INSERT INTO InvoiceLine
+  SELECT @invoiceLineId+1, @invoiceId, TrackId, UnitPrice, 1
+  FROM Track
+  WHERE Name Like 'Heartland';
+
+UPDATE Invoice SET Total = (
+  SELECT SUM(UnitPrice*Quantity)
+   FROM InvoiceLine
+   WHERE InvoiceId=@invoiceId
+) WHERE InvoiceId=@invoiceId;
+----
+
+5. Hem contractat al client *John Gordon*. El càrrec que ocuparà serà el de
+*Sales Manager* i el seu cap serà la *Nancy Edwards*.
++
+Afegeix una nova fila a la taula d'empleats, copiant totes les dades
+possibles de la taula de clients.
++
+[source,sql]
+----
+SELECT @employeeId:=MAX(EmployeeId)+1 FROM Employee;
+SELECT @reportsTo:=EmployeeId
+ FROM Employee
+ WHERE LastName LIKE 'Edwards' AND FirstName LIKE 'Nancy';
+
+INSERT INTO Employee
+  SELECT @employeeId, LastName, FirstName, 'Sales Manager', @reportsTo, '1990-04-29',
+   DATE(NOW()), Address, City, State, Country, PostalCode, Phone, Fax, Email
+  FROM Customer
+  WHERE FirstName LIKE 'John' AND LastName LIKE 'Gordon';
+----
+
+=== Actualitzacions
+
+1. El client *Mark Taylor* s'ha canviat d'adreça. Ara viu a *68-70 Oxford St, Darlinghurst NSW 2010, Australia*. Modifica la seva entrada a la base de dades
+d'acord amb aquest canvi.
++
+[source,sql]
+----
+UPDATE Customer
+ SET Address='68-70 Oxford Street', State='NSW', PostalCode='2010', Country='Australia'
+ WHERE FirstName LIKE 'Mark' AND LastName LIKE 'Taylor';
+----
+
+2. Disminueix un 20% els preus de les 30 cançons més curtes de la base de dades.
++
+[source,sql]
+----
+UPDATE Track
+ SET UnitPrice = 0.8*UnitPrice
+ WHERE TrackId IN (
+   SELECT * FROM (
+     SELECT TrackId
+      FROM Track
+      ORDER BY Milliseconds
+      LIMIT 30
+    ) AS t
+ );
+----
+
+3. Augmenta un 15% els preus de les 20 cançons més venudes de la base de dades.
++
+[source,sql]
+----
+UPDATE Track
+ SET UnitPrice = 1.15*UnitPrice
+ WHERE TrackId IN (
+   SELECT * FROM (
+     SELECT TrackId
+      FROM InvoiceLine
+      GROUP BY TrackId
+      ORDER BY SUM(Quantity) DESC
+      LIMIT 20
+   ) AS t
+ );
+----
+
+4. Fins ara, els clients de la Índia tenien com a assistent a l'empleada *Jane
+Peacock*, però a partir d'ara tindran a la *Margaret Park*. Fes el canvi
+corresponent a la base de dades.
++
+[source,sql]
+----
+UPDATE Customer
+ SET SupportRepId = (
+   SELECT EmployeeId
+    FROM Employee
+    WHERE LastName LIKE 'Park' AND FirstName LIKE 'Margaret'
+ ) WHERE Country LIKE 'India';
+----
+
+5. El client *Eduardo Martins* s'ha queixat d'un error a la seva última factura.
+A més de les cançons que hi consten, assegura que també va comprar un exemplar
+de la cançó *Garota De Ipanema*. Modifica la seva última factura per afegir
+aquesta compra.
++
+[source,sql]
+----
+SELECT @invoiceLineId:=MAX(InvoiceLineId)+1 FROM InvoiceLine;
+SELECT @invoiceId:=InvoiceId, @customerId:=Customer.CustomerId
+ FROM Invoice
+ JOIN Customer ON Invoice.CustomerId=Customer.CustomerId
+ WHERE FirstName LIKE 'Eduardo' AND LastName LIKE 'Martins'
+ ORDER BY InvoiceDate DESC
+ LIMIT 1;
+
+INSERT INTO InvoiceLine
+ SELECT @invoiceLineId, @invoiceId, TrackId, UnitPrice, 1
+  FROM Track
+  WHERE Name LIKE 'Garota De Ipanema'
+  LIMIT 1;
+
+UPDATE Invoice
+ SET Total=(
+   SELECT SUM(UnitPrice*Quantity)
+    FROM InvoiceLine
+    WHERE InvoiceId = @invoiceId
+ ) WHERE InvoiceId = @invoiceId;
+----
+
+=== Eliminacions
+
+1. Un error ha fet que totes les factures emeses el dia 28 de gener de 2013
+siguin errònies: es van guardar a la base de dades, però no es van cobrar ni es
+van entregar les cançons.
++
+Elimina totes les factures emeses aquest dia.
+
+[source,sql]
+----
+DELETE FROM InvoiceLine
+ WHERE InvoiceId IN (
+   SELECT InvoiceId
+    FROM Invoice
+    WHERE DATE(InvoiceDate) = '2013-01-28'
+ );
+
+DELETE FROM Invoice
+ WHERE DATE(InvoiceDate) = '2013-01-28';
+----
+
+2. Sembla que hi ha dues llistes de reproducció repetides a la base de dades.
+Són les que tenen com a nom *Music*. Elimina una de les dues llistes de
+reproducció completament.
+
+[source,sql]
+----
+DELETE FROM PlaylistTrack
+ WHERE PlaylistId = (
+   SELECT @playlistId:=PlaylistId
+    FROM Playlist
+    WHERE Name LIKE 'Music'
+    LIMIT 1
+ );
+
+DELETE FROM Playlist
+ WHERE PlaylistId = @playlistId;
+----
+
+3. Esborra totes les cançons de la base de dades que no s'hagin venut cap
+vegada fins ara.
+
+[source,sql]
+----
+DELETE FROM PlaylistTrack
+WHERE TrackId NOT IN (
+	SELECT TrackId
+	FROM InvoiceLine);
+
+DELETE FROM Track
+WHERE TrackId NOT IN (
+	SELECT TrackId
+	FROM InvoiceLine);
+----

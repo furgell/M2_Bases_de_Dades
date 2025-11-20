@@ -1,0 +1,55 @@
+= Llenguatges SQL: DDL
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+<<<
+
+== Activitat modificació de taules
+
+Realitzarem aquesta activitat sobre la base de dades _Miniwind_.
+
+El camp `supplier_ids` de la taula `products` és un clar exemple de mal
+disseny: estem utilitzant un atribut multivaluat i no s'està garantint la
+integritat referencial amb la taula `suppliers`. Anem a arreglar-ho.
+
+1. La relació entre `products` i `suppliers` és una relació de molts a molts.
+Crea la taula intermèdia de la relació. Crea-la sense clau primària ni claus
+foranes.
+
+2. Inicialitza la taula creada a l'apartat anterior amb les dades que hi ha a
+`products`:
++
+a. Per cada producte, si `supplier_ids` no conté un punt i coma, agafa la
+cadena completa com a identificador del proveïdor.
++
+b. Per cada producte, si `supplier_ids` conté un punt i coma, agafa el primer
+caràcter com un identificador del proveïdor, i agafa l'últim caràcter com un
+altre identificador d'un altre proveïdor.
+
+3. Esborra la columna `supplier_ids` de `products`.
+
+4. Afegeix la clau primària i les claus foranes a la nova taula.
+
+La segona modificació que volem fer és afegir la informació sobre l'IVA als
+productes i comandes.
+
+[start=5]
+5. Afegeix la columna `IVA` a la taula `products`. Fes que tingui un valor per
+defecte de 10.
+
+6. Les categories de cereals i gra tenen un IVA del 4%. La cervesa té un IVA del
+21%.
+
+7. Afegeix el camp `price_before_IVA` a `products`. Inicialitza'l restant l'IVA
+a `list_price`.
+
+8. Afegeix el camp `IVA` a la taula `order_details` i inicialitza'l d'acord al
+producte.
+
+9. Afegeix el camp `unit_price_before_IVA` a `order_details`. Inicialitza'l al
+preu adequat.

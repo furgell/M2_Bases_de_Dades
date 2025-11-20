@@ -1,0 +1,245 @@
+= Activitat: Consultes simples
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+== Solucions
+
+=== Consultes bàsiques
+
+1. Seleccionar de la taula `employees` tots els empleats de Washington. S'han
+d'ordenar els resultats pel cognom. Les dades que s'han de mostrar són
+l'identificador d'empleat, el cognom, i la posició laboral (`job_title`) que
+ocupa.
++
+[source,sql]
+----
+SELECT id, last_name, job_title
+ FROM employees
+ WHERE city LIKE 'Washington'
+ ORDER BY last_name;
+----
+
+2. Mostra l'identificador, el nom i el cognom dels empleats el cognom dels
+quals comenci per "J".
++
+[source,sql]
+----
+SELECT id, first_name, last_name
+ FROM employees
+ WHERE last_name LIKE 'J%';
+----
+
+3. Mostra els cognoms de la taula `employees` que tinguin una "e" en la segona
+posició.
++
+[source,sql]
+----
+SELECT last_name
+ FROM employees
+ WHERE last_name LIKE '_e%';
+----
+
+4. Mostra els noms de la taula `employees` que comencin per "T" i que continguin
+una "e".
++
+[source,sql]
+----
+SELECT first_name
+ FROM employees
+ WHERE first_name LIKE 'T%e%';
+----
+
+5. Mostra el cognom dels empleats la posició dels quals és "Sales Manager",
+"Sales Representative", o "Sales Coordinator". Escriu la sentència de dues
+formes fent servir dos operadors diferents.
++
+[source,sql]
+----
+SELECT last_name
+ FROM employees
+ WHERE job_title LIKE 'Sales Manager'
+  OR job_title LIKE 'Sales Representative'
+  OR job_title LIKE 'Sales Coordinator';
+----
++
+[source,sql]
+----
+SELECT last_name
+ FROM employees
+ WHERE job_title IN ('Sales Manager',
+      'Sales Representative','Sales Coordinator');
+----
+
+6. Mostra els cognoms dels empleats que no ocupin cap de les tres posicions
+anteriors. Escriu la sentència de dues formes fent servir dos operadors
+diferents.
++
+[source,sql]
+----
+SELECT last_name
+ FROM employees
+ WHERE job_title NOT LIKE 'Sales Manager'
+  AND job_title NOT LIKE 'Sales Representative'
+  AND job_title NOT LIKE 'Sales Coordinator';
+----
++
+[source,sql]
+----
+SELECT last_name
+ FROM employees
+ WHERE job_title NOT IN ('Sales Manager',
+      'Sales Representative','Sales Coordinator');
+----
+
+7. Mostra una llista dels empleats de Washington que sàpiguen francès (es diu a
+les notes), i d'Atlanta que no en sàpiguen. Volem veure el seu identificador, el
+nom, el cognom, la ciutat, i les notes.
++
+[source,sql]
+----
+SELECT id, first_name, last_name, city, notes
+ FROM employees
+ WHERE (
+   city LIKE 'Washington'
+   AND notes LIKE '%French%'
+ ) OR (
+   city LIKE 'Atlanta'
+   AND (
+    notes NOT LIKE '%French%'
+    OR notes IS NULL
+   )
+ );
+----
+
+8. Mostra el nom i el proveïdor dels productes de la taula `products` que siguin
+*només* del proveïdor (`supplier_ids`) número 4 o només del 10. Escriu la
+sentència de dues formes diferents.
++
+[source,sql]
+----
+SELECT product_name, supplier_ids
+ FROM products
+ WHERE supplier_ids = '4'
+  OR supplier_ids = '10';
+----
++
+[source,sql]
+----
+SELECT product_name, supplier_ids
+ FROM products
+ WHERE supplier_ids IN ('4','10');
+----
+
+9. Mostra el nom i el proveïdor dels productes de la taula `products` que *NO*
+siguin només del proveïdor 4 ni només del 10. Escriu la sentència de dues
+formes diferents.
++
+[source,sql]
+----
+SELECT product_name, supplier_ids
+ FROM products
+ WHERE supplier_ids != '4'
+  AND supplier_ids != '10';
+----
++
+[source,sql]
+----
+SELECT product_name, supplier_ids
+ FROM products
+ WHERE supplier_ids NOT IN ('4','10');
+----
+
+10. Obté el nom i el preu dels productes el preu dels quals (`list_price`) està
+comprès entre 10 i 20 (inclosos). Escriu la sentència de dues formes diferents.
++
+[source,sql]
+----
+SELECT product_name, list_price
+ FROM products
+ WHERE list_price>=10
+  AND list_price<=20;
+----
++
+[source,sql]
+----
+SELECT product_name, list_price
+ FROM products
+ WHERE list_price BETWEEN 10 AND 20;
+----
+
+11. Obté el nom i el preu dels productes el preu dels quals *NO* està
+comprès entre 10 i 20. Escriu la sentència de dues formes diferents.
++
+[source,sql]
+----
+SELECT product_name, list_price
+ FROM products
+ WHERE list_price<10
+  OR list_price>20;
+----
++
+[source,sql]
+----
+SELECT product_name, list_price
+ FROM products
+ WHERE list_price NOT BETWEEN 10 AND 20;
+----
+
+12. Obté el nom dels productes, el preu i el número del proveïdor que tinguin
+un preu superior a 20 i que siguin només del proveïdor número 4 o només del
+número 10. Escriu la sentència de dues formes diferents.
++
+[source,sql]
+----
+SELECT product_name, list_price, supplier_ids
+ FROM products
+ WHERE list_price > 20
+  AND (supplier_ids='4' OR supplier_ids='10');
+----
++
+[source,sql]
+----
+SELECT product_name, list_price, supplier_ids
+ FROM products
+ WHERE list_price > 20
+  AND supplier_ids IN ('4','10');
+----
+
+13. Mostra el nom, cost i preu dels productes pels quals la diferència entre el
+preu de cost (`standard_cost`) i el preu de venta sigui de més de 10.
++
+[source,sql]
+----
+SELECT product_name, standard_cost, list_price
+ FROM products
+ WHERE list_price - standard_cost > 10;
+----
+
+14. Selecciona la llista de productes que contenen la paraula '_soup_' en el seu
+nom. Escriu la consulta de manera que funcioni correctament independentment de
+si la paraula '_soup_' s'escriu en majúscules o en minúscules.
++
+[source,sql]
+----
+SELECT id, product_name
+ FROM products
+ WHERE product_name LIKE '%soup%';
+----
+
+15. Fes una llista de les comandes (taula `orders`) que es van servir al client
+número 4 i que, a més, han tingut un cost d'enviament (`shipping_fee`) de més
+de 4 dòlars. Mostra el seu identificador, la data de la comanda, i el cost
+d'enviament.
++
+[source,sql]
+----
+SELECT id, order_date, shipping_fee
+ FROM orders
+ WHERE customer_id = 4
+ AND shipping_fee > 4;
+----

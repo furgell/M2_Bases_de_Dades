@@ -1,0 +1,271 @@
+= Activitat: Més consultes simples
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+== Solucions
+
+1. Obté la data de la comanda, la data d'enviament i l'adreça d'enviament de
+totes les comandes enviades a la ciutat de New Orleans. Ordena els resultats per
+la data d'enviament, de més recents a més antigues.
++
+[source,sql]
+----
+SELECT order_date, shipped_date, ship_address
+ FROM orders
+ WHERE ship_city LIKE 'New Orleans'
+ ORDER BY order_date DESC;
+----
+
+2. Obté l'identificador, el nom de la persona receptora de l'enviament, i
+l'identificador de client, de totes les comandes per les quals no consta una
+data d'enviament. Ordena els resultats per l'identificador del client.
++
+[source,sql]
+----
+SELECT id, ship_name, customer_id
+ FROM orders
+ WHERE shipped_date IS NULL
+ ORDER BY customer_id;
+----
+
+3. Obté l'identificador, la data de la comanda, i l'identificador de client,
+de totes les comandes que es van fer entre el febrer i el maig de 2006
+(inclosos), i ordena-les per la data de la comanda.
++
+[source,sql]
+----
+SELECT id, order_date, customer_id
+ FROM orders
+ WHERE order_date BETWEEN '2006-02-01 00:00:00' AND '2006-05-31 23:59:59'
+ ORDER BY order_date;
+----
+
+4. Obté l'identificador, la data de la comanda, i la ciutat de destí de totes
+les comandes les despeses d'enviament de les quals siguin superiors a 100
+dòlars i que o bé s'hagin pagat amb un xec o bé siguin posteriors a febrer de
+2006 (sense incloure'l).
++
+[source,sql]
+----
+SELECT id, order_date, ship_city
+ FROM orders
+ WHERE shipping_fee>100 AND (payment_type='Check' OR order_date>='2006-03-01');
+----
+
+5. Obté l'identificador, i l'adreça i ciutat d'enviament de totes les comandes
+que siguin posteriors al 15 de maig de 2006 i que tinguin un enviament
+gratuït.
++
+[source,sql]
+----
+SELECT id, ship_address, ship_city
+ FROM orders
+ WHERE order_date>='2006-05-16'
+  AND shipping_fee=0;
+----
+
+6. Obté l'identificador, el nom, i el cognom de tots els clients el nom dels
+quals comença per A i que viuen a una ciutat el nom de la qual conté almenys
+una 'a'.
++
+[source,sql]
+----
+SELECT id, first_name, last_name
+ FROM customers
+ WHERE first_name LIKE 'A%'
+  AND city LIKE '%a%';
+----
+
+7. Obté l'identificador del producte, la quantitat de productes comprats i
+el preu de cada unitat, de la comanda amb número 51 (utilitza la taula
+`order_details`). Ordena el resultat per la quantitat, de gran a petit, i si
+de dos productes se n'ha comprat la mateixa quantitat, pel preu unitari (de
+molt a poc).
++
+[source,sql]
+----
+SELECT product_id, quantity, unit_price
+ FROM order_details
+ WHERE order_id=51
+ ORDER BY quantity DESC, unit_price DESC;
+----
+
+8. Obté l'identificador de totes les comandes per a les quals hi hagi almenys
+un dels productes comprats que no s'hagin facturat. Els productes facturats
+tenen un 2 a la columna `status_id` de la taula `order_details`. Evita resultats
+repetits i ordena els resultats de menor a major.
++
+[source,sql]
+----
+SELECT DISTINCT order_id
+ FROM order_details
+ WHERE status_id!=2
+ ORDER BY order_id;
+----
+
+9. Obté l'identificador, l'identificador de la comanda, i l'identificador del
+producte de totes les comandes (a `order_details`) que no estiguin associades
+a cap ítem d'inventari, o que estiguin associades a un ítem d'inventari de
+número superior a 130.
++
+[source,sql]
+----
+SELECT id, order_id, product_id
+ FROM order_details
+ WHERE inventory_id IS NULL
+  OR inventory_id>130;
+----
+
+10. Obté l'identificador, l'identificador de la comanda, l'identificador del
+producte, la quantitat comprada, el preu per unitat, i el preu total dels
+detalls de comanda el preu total dels quals sigui superior a 1000 però inferior
+a 10000.
++
+[source,sql]
+----
+SELECT id, order_id, product_id, quantity, unit_price, quantity*unit_price
+ FROM order_details
+ WHERE quantity*unit_price > 1000
+  AND quantity*unit_price < 10000;
+----
+
+11. Obté l'identificador, el codi de producte i el nom del producte, dels
+productes el preu de venta dels quals sigui menys d'un 30% superior al preu de
+cost.
++
+[source,sql]
+----
+SELECT id, product_code, product_name
+ FROM products
+ WHERE list_price < 1.3 * standard_cost;
+----
+
+12. Obté l'identificador, el codi de producte i el nom del producte, dels
+productes que no siguin begudes (_Beverages_) i que tinguin un preu de venta de
+menys de 10 dòlars. Ordena els resultats pel nom del producte.
++
+[source,sql]
+----
+SELECT id, product_code, product_name
+ FROM products
+ WHERE category NOT LIKE 'Beverages'
+  AND list_price < 10
+ ORDER BY product_name;
+----
+
+13. Obté l'identificador, el codi de producte i el nom del producte, dels
+productes que continguin la combinació 'ea' en el seu nom, però que no hi
+tinguin més de tres erres.
++
+[source,sql]
+----
+SELECT id, product_code, product_name
+ FROM products
+ WHERE product_name LIKE '%ea%'
+  AND product_name NOT LIKE '%r%r%r%r%';
+----
+
+14. Obté l'identificador, l'identificador del client, i la data de comanda, de
+totes les comandes pagades amb targeta de crèdit i enviades als estats de
+California (CA) o Florida (FL).
++
+[source,sql]
+----
+SELECT id, customer_id, order_date
+ FROM orders
+ WHERE payment_type LIKE 'Credit Card'
+  AND (ship_state_province LIKE 'CA'
+   OR ship_state_province LIKE 'FL');
+----
+
+15. Obté l'identificador, el nom, i el cognom, de tots els clients que tenen el
+nom o el cognom acabat en 'e', però no els dos. Ordena els resultats pel
+cognom.
++
+[source,sql]
+----
+SELECT id, first_name, last_name
+ FROM customers
+ WHERE (first_name LIKE '%e'
+   OR last_name LIKE '%e')
+  AND (first_name NOT LIKE '%e'
+   OR last_name NOT LIKE '%e')
+ ORDER BY last_name;
+
+SELECT id, first_name, last_name
+ FROM customers
+ WHERE (first_name LIKE '%e'
+   AND last_name NOT LIKE '%e')
+  OR (first_name NOT LIKE '%e'
+   AND last_name LIKE '%e')
+ ORDER BY last_name;
+----
+
+16. Obté l'identificador i el nom dels productes pels quals hi ha més d'un
+proveïdor.
++
+[source,sql]
+----
+SELECT id, product_name
+ FROM products
+ WHERE supplier_ids LIKE '%;%';
+----
+
+17. Obté l'identificador i el nom dels productes que són proporcionats pel
+proveïdor 3. La consulta ha de mostrar també els productes pels quals hi ha
+més d'un proveïdor i el proveïdor 3 és un d'ells. Utilitza el fet que sabem
+que només hi ha 10 proveïdors diferents.
++
+[source,sql]
+----
+SELECT id, product_name
+ FROM products
+ WHERE supplier_ids LIKE '%3%';
+----
+
+18. Obté l'identificador i el nom dels productes pels quals la quantitat que
+es demana quan es fa una comanda al proveïdor (`reorder_level`) no coincideix
+amb la quantitat mínima que s'ha de demanar (`minimum_reorder_quantity`).
+Tingues en compte que si només un dels dos camps val null s'ha de considerar
+com que no coincideixen.
++
+[source,sql]
+----
+SELECT id, product_name
+ FROM products
+ WHERE reorder_level != minimum_reorder_quantity
+  OR (reorder_level IS NULL AND minimum_reorder_quantity IS NOT NULL)
+  OR (reorder_level IS NOT NULL AND minimum_reorder_quantity IS NULL);
+----
+
+19. Mostra el nom, cognom, adreça i ciutat de residència de tots els clients,
+ordenats pel cognom, de l'A a la Z, després pel nom, també d'A a la Z, i
+finalment per la ciutat de residència, de la Z a la A.
++
+[source,sql]
+----
+SELECT first_name, last_name, address, city
+ FROM customers
+ ORDER BY last_name, first_name, city DESC;
+----
+
+20. Selecciona totes les comandes que encara no s'han completat
+(`status_id` val 3 si s'ha completat), i que es van fer entre el 15 de maig de
+2006 i el 15 de juny de 2006. D'aquestes comandes en volem saber
+l'identificador, l'identificador del client i de l'empleat, la data de la
+comanda, i el nom a qui s'han enviat. Ordena els resultats per l'identificador
+del client primer, i en segon lloc per l'identificador de l'empleat.
++
+[source,sql]
+----
+SELECT id, customer_id, employee_id, order_date, ship_name
+ FROM orders
+ WHERE status_id != 3
+  AND order_date BETWEEN '2006-05-15' AND '2006-06-15 23:59:59'
+ ORDER BY customer_id, employee_id;
+----

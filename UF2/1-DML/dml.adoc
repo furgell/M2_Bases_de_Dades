@@ -1,0 +1,3387 @@
+= Llenguatges SQL: DML
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+<<<
+
+== Introducció
+
+L'_Structured Query Language_ (SQL) és un llenguatge per a bases de dades
+dissenyat per gestionar les dades emmagatzemades en un sistema gestor de bases
+de dades relacional. La primera versió del SQL es va desenvolupar inicialment
+per IBM a principis dels 70. El 86 es va convertir en un estàndard ANSI i el
+87 en un estàndard ISO. La versió inicial, anomenada _SEQUEL_ (Structured
+English Query Language), es va dissenyar per manipular i extreure dades
+guardades al sistema de gestió de bases de dades quasi-relacional System R, de
+IBM. Aleshores, a finals dels 70, l'empresa Relational Software Inc., que ara
+és Oracle Corporation, va introduir la primera implementació comercial
+disponible del SQL: Oracle V2 per ordinadors VAX.
+
+Molts dels SGBD disponibles actualment, com Oracle Database, Microsoft SQL
+Server, MySQL, MariaDB o PostgreSQL, utilitzen SQL.
+
+Tot i l'estandarització del SQL, cada fabricant utilitza diverses extensions i
+variants que fan que siguin necessàries algunes adaptacions per passar codi
+SQL d'un sistema a un altre.
+
+En un SGBD, l'SQL s'utilitza per:
+
+* Crear la base de dades i les taules.
+* Realitzar les operacions bàsiques de gestió de les dades (addició, esborrat i
+modificació).
+* Realitzar consultes simples o complexes per seleccionar i ordenar les dades
+emmagatzemades i transformar-les en informació útil.
+
+El llenguatge de manipulació de dades del SQL (data manipulation language, DML)
+s'utilitza per consultar i modificar les dades de la base de dades. En aquesta
+secció, descriurem com s'utilitzen les sentències DML SELECT, INSERT, UPDATE i
+DELETE, que es defineixen a continuació:
+
+* _SELECT_ - per consultar dades de la base de dades.
+* _INSERT_ - per inserir dades en una taula.
+* _UPDATE_ - per actualitzar dades d'una taula.
+* _DELETE_ - per esborrar dades d'una taula.
+
+En una sentència SQL de DML:
+
+* Cada clàusula en una sentència hauria de començar en una nova línia.
+* L'inici de cada clàusula hauria d'alinear-se amb l'inici de les altres
+clàusules.
+* Si una clàusula té diverses parts, haurien d'aparèixer en línies separades
+i estar sagnades sota el principi de la clàusula per mostrar-ne la relació.
+* Les lletres en majúscula s'utilitzen per representar les paraules reservades.
+* Les lletres en minúscula s'utilitzen per representar paraules definides per
+l'usuari.
+
+== Consulta de dades: sentència SELECT
+
+La sentència SELECT permet a l'usuari extreure dades de les taules,
+basant-se en criteris específics.
+
+Una sentència SELECT pot incloure una sèrie de clàusules, totes elles opcionals,
+que permeten especificar exactament quina informació volem obtenir.
+
+En els següents exemples veurem diversos usos de SELECT.
+
+L'ús més senzill de SELECT (poc habitual) és sense cap clàusula addicional:
+
+[source,sql]
+----
+SELECT 3+5;
+8
+----
+
+Aquí veiem que podem utilitzar SELECT per resoldre expressions matemàtiques. Si
+volem obtenir dades d'una base de dades com a mínim necessitarem la clàusula
+FROM que determina la taula a consultar.
+
+Els següents exemples realitzen consultes sobre la taula `Employees`, que té
+la següent estructura i contingut:
+
+[width="100%",options="header"]
+.Taula Employees
+|===
+| Id | FirstName | LastName  | EMail                    | Phone        | JobTitle             | BirthDate  | Salary
+|  1 | Meade     | Twigg     | mtwigg0@nymag.com        | 796-159-7480 | Help Desk Technician | 1990-02-15 |   1400
+|  2 | Amargo    | Heathwood | aheathwood1@ow.ly        | 225-923-8090 | Legal Assistant      | 1975-09-23 |   1900
+|  3 | Christie  | Cutmere   | ccutmere2@wikimedia.org  | 350-605-5247 | Tax Accountant       | 1982-11-01 |   2100
+|  4 | Reena     | Polycote  | NULL                     | 729-706-3654 | Civil Engineer       | 1984-08-12 |   1800
+|  5 | Horst     | Laybourn  | hlaybourn4@usatoday.com  | 413-491-3518 | Software Consultant  | 1986-09-21 |   1800
+|  6 | Jo        | Ledgeway  | jledgeway5@gnu.org       | 566-264-7812 | Accountant           | 1978-03-06 |   2200
+|  7 | Samuele   | Durdan    | sdurdan6@dailymail.co.uk | NULL         | Software Engineer    | 1980-02-07 |   1900
+|  8 | Beatrice  | Lodovichi | blodovichi7@nasa.gov     | 608-742-5611 | Software Engineer    | 1992-11-30 |   2100
+|  9 | Phil      | Rizzi     | prizzi8@ca.gov           | 785-787-4204 | Financial Analyst    | 1989-05-26 |   2200
+| 10 | Perry     | Knell     | pknell9@mozilla.com      | 610-171-0084 | Software Engineer    | 1972-06-29 |   2300
+|===
+
+Per provar els exemples, podem link:db/mariadb/Employees.sql[descarregar la taula]
+i importar-la.
+
+Podem utilitzar la sentència SELECT per generar una llista dels telèfons dels
+empleats a partir de la taula `Employees` de la següent manera:
+
+[source,sql]
+----
+SELECT FirstName, LastName, Phone
+ FROM Employees
+ ORDER BY LastName;
+----
+
+Aquesta acció mostrarà el nom i cognom dels empleats, i el seu número de
+telèfon, i ordenarà els resultats pel cognom. El resultat serà:
+
+[width="100%",options="header"]
+.Nom, cognom i telèfon ordenats per cognom
+|===
+|FirstName |LastName |Phone
+| Christie  | Cutmere   | 350-605-5247
+| Samuele   | Durdan    | NULL
+| Amargo    | Heathwood | 225-923-8090
+| Perry     | Knell     | 610-171-0084
+| Horst     | Laybourn  | 413-491-3518
+| Jo        | Ledgeway  | 566-264-7812
+| Beatrice  | Lodovichi | 608-742-5611
+| Reena     | Polycote  | 729-706-3654
+| Phil      | Rizzi     | 785-787-4204
+| Meade     | Twigg     | 796-159-7480
+|===
+
+[NOTE]
+====
+L'ordre de les clàusules és important. No seria vàlida:
+
+[source,sql]
+----
+SELECT FirstName, LastName, Phone
+ ORDER BY LastName
+ FROM Employees;
+----
+====
+
+En el següent exemple, mostrarem tots els empleats, però els ordenarem
+pel seu càrrec. En cas que dos empleats tinguin el mateix càrrec,
+els ordenarem pel seu cognom:
+
+[source,sql]
+----
+SELECT *
+  FROM Employees
+  ORDER BY JobTitle, LastName;
+----
+
+[width="100%",options="header"]
+.Taula Employees completa, ordenant per JobTitle i LastName
+|===
+| Id | FirstName | LastName  | EMail                    | Phone        | JobTitle             | BirthDate  | Salary
+|  6 | Jo        | Ledgeway  | jledgeway5@gnu.org       | 566-264-7812 | Accountant           | 1978-03-06 |   2200
+|  4 | Reena     | Polycote  | NULL                     | 729-706-3654 | Civil Engineer       | 1984-08-12 |   1800
+|  9 | Phil      | Rizzi     | prizzi8@ca.gov           | 785-787-4204 | Financial Analyst    | 1989-05-26 |   2200
+|  1 | Meade     | Twigg     | mtwigg0@nymag.com        | 796-159-7480 | Help Desk Technician | 1990-02-15 |   1400
+|  2 | Amargo    | Heathwood | aheathwood1@ow.ly        | 225-923-8090 | Legal Assistant      | 1975-09-23 |   1900
+|  5 | Horst     | Laybourn  | hlaybourn4@usatoday.com  | 413-491-3518 | Software Consultant  | 1986-09-21 |   1800
+|  7 | Samuele   | Durdan    | sdurdan6@dailymail.co.uk | NULL         | Software Engineer    | 1980-02-07 |   1900
+| 10 | Perry     | Knell     | pknell9@mozilla.com      | 610-171-0084 | Software Engineer    | 1972-06-29 |   2300
+|  8 | Beatrice  | Lodovichi | blodovichi7@nasa.gov     | 608-742-5611 | Software Engineer    | 1992-11-30 |   2100
+|  3 | Christie  | Cutmere   | ccutmere2@wikimedia.org  | 350-605-5247 | Tax Accountant       | 1982-11-01 |   2100
+|===
+
+[IMPORTANT]
+====
+En absència d'ORDER BY no podem garantir l'ordre dels resultats. Això significa que
+encara que els obtenim ordenats d'alguna manera, a mesura que la taula rebi
+modificacions, aquest ordre no té per què mantenir-se.
+====
+
+=== SELECT DISTINCT
+
+Podem utilitzar la sentència SELECT DISTINCT per obtenir un conjunt de resultats
+sense repeticions.
+
+Obté el nom dels diversos llocs de treball que hi ha a la taula `Employees`,
+ordenats alfabèticament.
+
+[source,sql]
+----
+SELECT DISTINCT JobTitle
+  FROM Employees
+  ORDER BY JobTitle;
+----
+
+Obté una llista amb els diferents sous que s'estan pagant a l'empresa, ordenada
+de menor a major.
+
+[source,sql]
+----
+SELECT DISTINCT Salary
+  FROM Employees
+  ORDER BY Salary;
+----
+
+=== Àlies
+
+Podem modificar el nom amb què es mostrarà qualsevol de les columnes resultat
+utilitzant un àlies.
+
+Per crear un àlies n'hi ha prou amb afegir el nom que volem després del nom de
+la columna original o del càlcul al qual volem assignar un nom. Opcionalment,
+podem incloure la paraula `AS` (_com_) entremig.
+
+Per exemple, la consulta dels telèfons es podria reescriure així:
+
+[source,sql]
+----
+SELECT FirstName AS Nom, LastName AS Cognom, Phone AS 'Telèfon'
+ FROM Employees
+ ORDER BY LastName;
+----
+
+Obtindríem els següents resultats:
+
+[width="100%",options="header"]
+.Nom, cognom i telèfon ordenats per cognom
+|===
+|Nom |Cognom |Telèfon
+| Christie | Cutmere   | 350-605-5247
+| Samuele  | Durdan    | NULL
+| Amargo   | Heathwood | 225-923-8090
+| Perry    | Knell     | 610-171-0084
+| Horst    | Laybourn  | 413-491-3518
+| Jo       | Ledgeway  | 566-264-7812
+| Beatrice | Lodovichi | 608-742-5611
+| Reena    | Polycote  | 729-706-3654
+| Phil     | Rizzi     | 785-787-4204
+| Meade    | Twigg     | 796-159-7480
+|===
+
+L'última consulta es pot escriure, amb idèntics resultats, sense utilitzar `AS`:
+
+[source,sql]
+----
+SELECT FirstName Nom, LastName Cognom, Phone 'Telèfon'
+ FROM Employees
+ ORDER BY LastName;
+----
+
+A banda de l'aspecte estètic, els àlies ens serviran més endavant per donar
+nom a columnes de resultats i poder utilitzar-les en altres punts de la
+consulta.
+
+[WARNING]
+====
+Cal notar la importància de separar amb comes els diferents camps d'una
+consulta.
+====
+
+Imaginem que recuperem la consulta original:
+
+[source,sql]
+----
+SELECT FirstName, LastName, Phone
+ FROM Employees
+ ORDER BY LastName;
+----
+
+Però que a l'escriure, ens deixem la coma que separa `FirstName` i `LastName`:
+
+[source,sql]
+----
+SELECT FirstName LastName, Phone
+ FROM Employees
+ ORDER BY LastName;
+----
+
+El resultat seria que només recuperaríem les columnes `FirstName` i `Phone`,
+però li posaríem de nom `LastName` a `FirstName`:
+
+[width="100%",options="header"]
+.Resultat confús, estem dient `LastName` a `FirstName`
+|===
+| LastName | Phone
+| Amargo   | 225-923-8090
+| Beatrice | 608-742-5611
+| Christie | 350-605-5247
+| Horst    | 413-491-3518
+| Jo       | 566-264-7812
+| Meade    | 796-159-7480
+| Perry    | 610-171-0084
+| Phil     | 785-787-4204
+| Reena    | 729-706-3654
+| Samuele  | 830-960-9186
+|===
+
+=== Sentència SELECT amb criteris WHERE
+
+Sovint voldrem recuperar només algunes files d'una taula. Per exemple,
+podem volem saber el nom dels empleats que són enginyers de programari.
+En aquesta situació, utilitzarem la sentència SELECT amb un criteri WHERE.
+
+==== Operadors de comparació per cadenes de text
+
+Recuperem el nom complet dels enginyers de programari:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE JobTitle = 'Software Engineer'
+  ORDER BY LastName;
+----
+
+[width="100%",options="header"]
+.Nom i cognom dels enginyers de programari
+|===
+| FirstName | LastName
+| Samuele   | Durdan
+| Perry     | Knell
+| Beatrice  | Lodovichi
+|===
+
+Com hem vist a l'exemple, a la clàusula WHERE hem d'escriure algun tipus de
+comparació. Aquesta comparació s'avalua per totes les files de la taula, i
+es mostren només aquelles files per les quals la comparació resulta ser certa.
+
+[NOTE]
+====
+Hi ha dues formes de comparar cadenes de text, amb = i amb LIKE. Veurem la
+diferència en un apartat posterior.
+====
+
+La següent sentència és equivalent a l'anterior, utilitzant LIKE:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE JobTitle LIKE 'Software Engineer'
+  ORDER BY LastName;
+----
+
+En el següent exemple, volem veure el nom i cognom dels empleats que _NO_ són
+enginyers de programari:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE JobTitle != 'Software Engineer'
+  ORDER BY LastName;
+----
+
+O, de forma equivalent:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE JobTitle NOT LIKE 'Software Engineer'
+  ORDER BY LastName;
+----
+
+[IMPORTANT]
+====
+Noteu que cal posar cometes al voltant de les cadenes de text literals, és
+a dir, que no són el nom d'una taula o atribut, com en els exemples amb
+'Software Engineer'.
+====
+
+==== Operadors de comparació per nombres i dates
+
+Els nombres i dates es poden comparar amb més operadors.
+
+Els empleats que cobren més de 1900 euros:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE Salary > 1900
+  ORDER BY LastName;
+----
+
+Els empleats que cobren 1900 euros o més:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE Salary >= 1900
+  ORDER BY LastName;
+----
+
+Els empleats que van néixer el 15 de febrer del 1990:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE BirthDate = '1990-02-15'
+  ORDER BY LastName;
+----
+
+[NOTE]
+====
+Noteu que cal posar cometes quan ens referim a una data. En cas contrari,
+s'interpretaria el símbol - com una resta de nombres.
+
+Observeu també que primer posem l'any, després el mes, i finalment el dia.
+====
+
+Els empleats que van néixer el 15 de febrer del 1990 o abans:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE BirthDate <= '1990-02-15'
+  ORDER BY LastName;
+----
+
+Els empleats que van néixer abans del 1990:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE BirthDate < '1990-01-01'
+  ORDER BY LastName;
+----
+
+==== Especificar rangs amb BETWEEN
+
+L'operador BETWEEN permet crear criteris on algun dels camps s'ha de trobar
+entre dos valors.
+
+Els empleats que cobren entre 1900 i 2200 euros:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE Salary BETWEEN 1900 AND 2200
+  ORDER BY LastName;
+----
+
+[NOTE]
+====
+Els resultats de BETWEEN inclouen les files que tenen un valor de comparació
+idèntic a un dels dos extrems. A l'exemple anterior, els empleats que cobren
+just 1900 o 2200 euros surten als resultats.
+====
+
+També podem utilitzar NOT BETWEEN per obtenir els altres resultats.
+
+Els empleats que cobren menys de 1900 euros, o més de 2200 euros:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE Salary NOT BETWEEN 1900 AND 2200
+  ORDER BY LastName;
+----
+
+==== Unió de criteris amb AND i OR
+
+Podem unir diverses condicions utilitzant els operadors AND o OR. Amb AND
+obtindrem les files que compleixen les dues condicions, mentre que amb OR
+obtindrem les files que compleixen almenys una de les dues condicions.
+
+Els empleats que són enginyers de programari o que van néixer el 1990 o més tard:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE JobTitle = 'Software Engineer'
+    OR BirthDate >= '1990-01-01'
+  ORDER BY LastName;
+----
+
+Els empleats que són enginyers de programari i que a més van néixer el 1990 o
+més tard:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE JobTitle = 'Software Engineer'
+    AND BirthDate >= '1990-01-01'
+  ORDER BY LastName;
+----
+
+Algunes consultes es poden escriure utilitzant BETWEEN o AND.
+
+Els empleats que van néixer el 1990:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE BirthDate >= '1990-01-01'
+    AND BirthDate <= '1990-12-31'
+  ORDER BY LastName;
+
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE BirthDate BETWEEN '1990-01-01' AND '1990-12-31'
+  ORDER BY LastName;
+----
+
+[WARNING]
+====
+Cada clàusula que envolta un AND o OR ha de ser completa. La sentència
+següent és invàlida:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE BirthDate >= '1990-01-01' AND <= '1990-12-31'
+  ORDER BY LastName;
+----
+====
+
+==== Combinació de múltiples AND i OR
+
+Els operadors AND i OR es poden combinar múltiples vegades a la mateixa
+sentència. En aquests casos és convenient utilitzar parèntesis per garantir
+l'ordre adequat de les operacions.
+
+Volem els empleats que compleixen que són enginyers de programari i cobren
+més de 2000 euros. A més, volem els empleats que es diuen Phil de nom:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE (JobTitle = 'Software Engineer'
+    AND Salary > 2000)
+    OR FirstName = 'Phil'
+  ORDER BY LastName;
+----
+
+Volem els empleats que són enginyers de programari. També volem els que
+cobren més de 2000 euros, o bé que es diuen Phil de nom:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE JobTitle = 'Software Engineer'
+    AND (Salary > 2000
+    OR FirstName = 'Phil')
+  ORDER BY LastName;
+----
+
+==== Operador IN
+
+Finalment, l'operador IN permet comprovar si el valor d'un atribut està
+inclòs a un conjunt de valors-
+
+Els empleats que es diuen Phil, Horst o Amargo de nom:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE FirstName IN ('Phil', 'Horst', 'Amargo')
+  ORDER BY LastName;
+----
+
+[NOTE]
+====
+Noteu els parèntesis al voltants dels valors possibles quan utilitzem IN.
+====
+
+Aquesta sentència també es pot escriure de la següent manera:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE FirstName = 'Phil'
+    OR FirstName = 'Horst'
+    OR FirstName = 'Amargo'
+  ORDER BY LastName;
+----
+
+Com hem fet abans amb LIKE i amb BETWEEN, l'operador IN també es pot negar
+utilitzant NOT.
+
+Els empleats que _NO_ es diuen Phil, ni Horst, ni Amargo:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE FirstName NOT IN ('Phil', 'Horst', 'Amargo')
+  ORDER BY LastName;
+----
+
+També podríem escriure aquesta sentència de la següent manera:
+
+[source,sql]
+----
+SELECT FirstName, LastName
+  FROM Employees
+  WHERE FirstName != 'Phil'
+    AND FirstName != 'Horst'
+    AND FirstName != 'Amargo'
+  ORDER BY LastName;
+----
+
+==== El valor NULL
+
+Un _NULL_ és un valor especial, independent del tipus de dades, que significa
+desconegut o inaplicable. No significa zero o en blanc. Entre les
+característiques de NULL s'inclouen:
+
+* No és una entrada de dades.
+* No és permès en una clau primària.
+* Ha d'evitar-se en altres atributs.
+* Pot representar:
+** Un valor desconegut de l'atribut.
+** Un valor conegut, però que manca, de l'atribut.
+** Una condició "no aplicable".
+* Pot resultar confús quan s'utilitzen funcions com COUNT, AVERAGE o SUM.
+* La presència de nulls complica les sentències quan s'enllacen taules. Si no
+tenim molt clar què estem fent, fàcilment podem obtenir dades errònies.
+
+NOTE: En MySQL, el resultat d'una operació de comparació és null quan qualsevol
+dels arguments és null. El resultat d'una operació aritmètica és null quan
+qualsevol dels arguments és null (excepte funcions que ignorin nulls):
+
+[source,sql]
+----
+> SELECT NULL > 5 AS "Comparació amb NULL";
++----------------------+
+| Comparació amb NULL  |
++----------------------+
+|                 NULL |
++----------------------+
+1 row in set (0.00 sec)
+----
+
+[source,sql]
+----
+> SELECT 5+NULL AS "Suma amb NULL";
++---------------+
+| Suma amb NULL |
++---------------+
+|          NULL |
++---------------+
+----
+
+==== Exemple de com es pot utilitzar NULL
+
+Utilitzem la taula Salary de la següent figura per veure un exemple de com
+es pot utilitzar null.
+
+.Taula Salary amb un exemple de NULL.
+|===
+|EmployeeId |JobName |Salary |Commision
+|E10 |Sales |12500 |32090
+|E11 |NULL |25000 |8000
+|E12 |Sales |44000 |0
+|E13 |Sales |44000 |NULL
+|===
+
+Per començar, trobem tots els empleats (EmployeeId) de ventes (Sales a la
+columna JobName) el salari dels quals més comissions sigui més gran que 30000.
+
+[source,sql]
+----
+SELECT EmployeeId FROM Salary
+  WHERE JobName = "Sales"
+  AND (Commission + Salary) > 30000
+----
+
+El resultat retorna E10 i E12, però no inclou E13 per culpa del valor NULL a la
+columna _Comission_.
+
+Per assegurar que s'inclou aquesta columna amb el valor NULL, necessitem mirar
+als camps individuals. Si sumem la comissió i el sou per l'empleat E13, el
+resultat serà un valor NULL. La solució es mostra a continuació:
+
+[source,sql]
+----
+SELECT EmployeeId FROM Salary
+  WHERE JobName = "Sales"
+  AND (Commission > 30000
+    OR Salary > 30000
+    OR (Commission + Salary) > 30000)
+----
+
+El resultat d'aquesta consulta retorna els empleats E10, E12 i E13.
+
+Els últims dos exemples il·lustren com es poden utilitzar IS NULL i IS NOT NULL
+per seleccionar registres. Per aquests exemples, s'utilitzaria una taula *Books*
+(que no es mostra) amb els camps anomenats *Title*, *Quantity*, i *Price* (del
+llibre).
+
+.Utilitzem IS NULL per obtenir els llibres dels quals no sabem el preu
+====
+[source,sql]
+----
+SELECT Price, Title
+ FROM Books
+ WHERE Price IS NULL
+----
+====
+
+.Utilitzem IS NOT NULL per obtenir els llibres que tenen assignat algun preu
+====
+[source,sql]
+----
+SELECT Price, Title
+ FROM Books
+ WHERE Price IS NOT NULL
+----
+====
+
+=== Ús de comodins a la clàusula LIKE
+
+La paraula clau LIKE selecciona files que contenen camps que coincideixen amb
+porcions de cadenes de caràcters. El LIKE es pot utilitzar amb dades de tipus
+CHAR, VARCHAR, TEXT, DATE i DATETIME. Un _comodí_ permet a l'usuari fer coincidir
+camps que contenen certes lletres. Per exemple, la província comodí
+'N%' donaria totes les províncies que comencen per la lletra 'N'. La següent
+taula mostra dues formes d'especificar comodins en una sentència SELECT.
+
+[width="100%"cols="<20%,<80%",]
+.Comodins a la sentència SELECT
+|===
+|%|Qualsevol cadena de zero o més caràcters.
+|_|Un únic caràcter.
+|===
+
+Al primer exemple, LIKE 'Mc%' cerca tots els cognoms que comencen per les
+lletres "Mc" (per exemple, McBadden).
+
+[source,sql]
+----
+SELECT LastName
+ FROM Employees
+ WHERE LastName LIKE 'Mc%'
+----
+
+Al segon exemple, LIKE '%inger' cerca tots els cognoms que acaben amb les
+lletres "inger" (per exemple, Ringer, Stringer).
+
+[source,sql]
+----
+SELECT LastName
+ FROM Employees
+ WHERE LastName LIKE '%inger'
+----
+
+Al tercer exemple, LIKE '%en%' cerca tots els cognoms que tenen la combinació
+de lletres "en" (per exemple, Bennet, Green, McBadden).
+
+[source,sql]
+----
+SELECT LastName
+ FROM Employees
+ WHERE LastName LIKE '%en%'
+----
+
+==== Comparació de cadenes amb LIKE i amb =
+
+Un dubte habitual és si s'ha d'utilitzar LIKE o = per comparar cadenes de text.
+
+Naturalment, si necessitem utilitzar comodins cal utilitzar LIKE, perquè = no
+els suporta. Però, què passa si no necessitem comodins?
+
+La comparació amb LIKE és lleugerament diferent de la comparació amb =. Quan
+comparem amb LIKE la comparació es realitza caràcter a caràcter tenint en compte
+l'ordenació de caràcters (*collation*) utilitzada, mentre que = fa la comparació
+sobre tota la cadena.
+
+La diferència més evident d'això es veu en el següent exemple:
+
+[source,sql]
+----
+> SELECT 'a ' LIKE 'a';
++---------------+
+| 'a ' LIKE 'a' |
++---------------+
+|             0 |
++---------------+
+1 row in set (0.00 sec)
+
+> SELECT 'a ' = 'a';
++------------+
+| 'a ' = 'a' |
++------------+
+|          1 |
++------------+
+1 row in set (0.00 sec)
+----
+
+Per LIKE l'espai del final no es pot aparellar amb cap caràcter de la segona
+cadena, i per això conclou que les cadenes són diferents. En canvi, per =, com
+que l'espai no influeix en l'ordenació d'una cadena, considera que les dues
+cadenes són iguals.
+
+Per altra banda, si dues cadenes tenen el mateix nombre de caràcters i tenen
+la mateixa posició segons l'ordenació utilitzada, tant LIKE com = indicaran
+que són iguals:
+
+[source,sql]
+----
+> SELECT 'à' LIKE 'a';
++---------------+
+| 'à' LIKE 'a'  |
++---------------+
+|             1 |
++---------------+
+1 row in set (0.00 sec)
+
+> SELECT 'à' = 'a';
++------------+
+| 'à' = 'a'  |
++------------+
+|          1 |
++------------+
+1 row in set (0.00 sec)
+----
+
+Si volem fer una comparació per veure si dues cadenes són idèntiques, ho podem
+fer indicant que la comparació s'ha de fer directament sobre la codificació en
+binari de les cadenes:
+
+[source,sql]
+----
+> SELECT BINARY 'à' = 'a';
++-------------------+
+| BINARY 'à' = 'a'  |
++-------------------+
+|                 0 |
++-------------------+
+1 row in set (0.01 sec)
+----
+
+Finalment, cal tenir en compte que, excepte l'ordenació binària, les ordenacions
+no diferencia entre minúscules i majúscules:
+
+[source,sql]
+----
+> SELECT 'a' LIKE 'A';
++--------------+
+| 'a' LIKE 'A' |
++--------------+
+|            1 |
++--------------+
+1 row in set (0.00 sec)
+
+> SELECT 'a' = 'A';
++-----------+
+| 'a' = 'A' |
++-----------+
+|         1 |
++-----------+
+1 row in set (0.00 sec)
+----
+
+=== Sentència SELECT amb clàusula ORDER BY
+
+Utilitzem la clàusula ORDER BY per ordenar els registres a la llista de
+resultats. Podem usar _ASC_ per ordenar els resultats de forma ascendent (per
+defecte), i _DESC_ per ordenar-los de forma descendent.
+
+.Exemple d'ORDER BY amb ASC
+====
+[source,sql]
+----
+SELECT *
+ FROM Employees
+ ORDER BY HireDate ASC
+----
+====
+
+En el següent exemple, la llista de llibres s'ordenaria alfabèticament segons
+els seu tipus. Els llibres que tinguin el mateix tipus s'ordenaran entre ells
+pel seu preu, de més car a més barat:
+
+.Exemple d'ORDER BY amb DESC
+====
+[source,sql]
+----
+SELECT *
+ FROM Books
+ ORDER BY Type, Price DESC
+----
+====
+
+=== Sentència SELECT amb clàusula LIMIT
+
+La clàusula LIMIT s'utilitza per limitar la quantitat retornada de resultats
+en un cert número.
+
+.Exemple d'ús de LIMIT
+====
+Retorna els tres empleats que fa més temps que treballen a l'empresa.
+
+[source,sql]
+----
+SELECT *
+ FROM Employees
+ ORDER BY HireDate
+ LIMIT 3
+----
+
+Aquesta sentència retornarà com a molt tres empleats (en retornarà menys si,
+per exemple, només hi ha un o dos empleats contractats a l'empresa).
+====
+
+La clàusula LIMIT s'utilitza sovint per obtenir una visió prèvia de les dades
+quan estem escrivint una consulta complexa, i així evitem mostrar moltes dades
+per pantalla.
+
+Quan s'utilitza en una sentència real, normalment va sempre precedit d'un
+ORDER BY que determina quins són els resultats que ens interessaran.
+
+LIMIT accepta un segon paràmetre opcional. Quan el posem, estem indicant que
+volem saltar-nos alguns resultats abans de seleccionar els que ens interessen.
+
+.Exemple de LIMIT amb dos paràmetres
+====
+Retorna el llibre que ocupa el cinquè lloc per preu.
+
+[source,sql]
+----
+SELECT *
+ FROM Books
+ ORDER BY Price DESC
+ LIMIT 4, 1
+----
+
+Aquesta sentència se salta els 4 llibres més cars i retorna només el cinquè.
+Si hi hagués menys de 5 llibres a la base de dades no retornaria cap resultat.
+====
+
+LIMIT amb dos paràmetres s'utilitza molt per _paginar_ els resultats d'una
+consulta. Per exemple, si volem mostrar en una web els resultats d'una consulta
+i hi ha centenars de resultats, en mostrarem només uns quants cada vegada.
+
+=== Sentència SELECT amb clàusula GROUP BY
+
+La clàusula _GROUP BY_ s'utilitza per crear una fila de sortida per cada
+grup i produeix valors de resum per a les columnes seleccionada.
+
+La seva sintaxi és:
+
+[source,sql]
+----
+SELECT columnes
+ FROM taula
+ ...
+ GROUP BY columna
+----
+
+Treballarem amb la base de dades link:db/mariadb/groupbytest.sql[groupbytest],
+taula `Employees`:
+
+[source,sql]
+----
+SELECT * FROM Employees;
++----+-----------+-----------+---------+
+| Id | FirstName | LastName  | Salary  |
++----+-----------+-----------+---------+
+|  1 | Maria     | Martínez  | 1700.00 |
+|  2 | Pere      | Prat      | 1100.00 |
+|  3 | Pere      | Garcia    | 1500.00 |
+|  4 | Marta     | Muñoz     | 1100.00 |
++----+-----------+-----------+---------+
+4 rows in set (0.00 sec)
+----
+
+Si agrupem pel nom dels empleats tindrem tres grups: els empleats que es diuen
+Maria, els que es diuen Pere i els que es diuen Marta. La següent sentència
+calcula el sou mínim per cadascun d'aquests tres grups:
+
+[source,sql]
+----
+SELECT FirstName, MIN(Salary)
+ FROM Employees
+ GROUP BY FirstName
+ ORDER BY FirstName;
++-----------+-------------+
+| FirstName | MIN(Salary) |
++-----------+-------------+
+| Maria     |     1700.00 |
+| Marta     |     1100.00 |
+| Pere      |     1100.00 |
++-----------+-------------+
+3 rows in set (0.01 sec)
+----
+
+Canviem ara l'agrupació; agruparem pel sou. En aquest cas també tenim tres
+grups: els que cobren 1700, els que cobren 1100 i els que cobren 1500.
+
+La següent sentència calcula quants empleats hi ha a cadascun d'aquest grups:
+
+[source,sql]
+----
+SELECT COUNT(*), Salary
+ FROM Employees
+ GROUP BY Salary
+ ORDER BY Salary DESC;
++----------+---------+
+| COUNT(*) | Salary  |
++----------+---------+
+|        1 | 1700.00 |
+|        1 | 1500.00 |
+|        2 | 1100.00 |
++----------+---------+
+3 rows in set (0.00 sec)
+----
+
+Podem combinar el WHERE amb el GROUP BY. En aquest cas, la clàusula WHERE
+filtra les files de la taula i les seleccionades són les que després
+s'agrupen.
+
+Per exemple, la següent sentència és similar a l'anterior, però hem extret tots
+els empleats que es diuen Pere:
+
+[source,sql]
+----
+SELECT COUNT(*), Salary
+ FROM Employees
+ WHERE FirstName NOT LIKE 'Pere'
+ GROUP BY Salary
+ ORDER BY Salary DESC;
++----------+---------+
+| COUNT(*) | Salary  |
++----------+---------+
+|        1 | 1700.00 |
+|        1 | 1100.00 |
++----------+---------+
+2 rows in set (0.00 sec)
+----
+
+==== Ús de COUNT amb GROUP BY
+
+Podem usar COUNT per comptar quants ítems hi ha en un contenidor. Tanmateix,
+si volem comptar diferents ítems en diferents grups, com per exemple bales de
+diversos colors, aleshores utilitzaríem la funció COUNT amb l'ordre GROUP BY.
+
+[source,sql]
+----
+SELECT * FROM Employees3;
++----+-----------+-----------+---------+
+| Id | FirstName | LastName  | Salary  |
++----+-----------+-----------+---------+
+|  1 | Maria     | Martínez  | 1700.00 |
+|  2 | Pere      | Prat      | 1100.00 |
+|  3 | Pere      | Garcia    | 1500.00 |
+|  4 | Marta     | Muñoz     | 1100.00 |
+|  5 | Maria     | Herrera   | 1700.00 |
+|  6 | Pere      | Rovira    | 1500.00 |
+|  7 | Miquel    | Armenter  | 1700.00 |
+|  8 | Sílvia    | Barba     | 1500.00 |
+|  9 | Pere      | Serrano   |    NULL |
+| 10 | Marta     | Perich    |    NULL |
+| 11 | Marta     | Nogué     | 1100.00 |
++----+-----------+-----------+---------+
+11 rows in set (0.000 sec)
+----
+
+La sentència SELECT de sota il·lustra com comptar grups de dades utilitzant
+la funció COUNT amb la clàusula GROUP BY.
+
+[source,sql]
+----
+SELECT COUNT(*) AS NumEmployees, Salary FROM Employees3 GROUP BY Salary ORDER BY NumEmployees DESC;
++--------------+---------+
+| NumEmployees | Salary  |
++--------------+---------+
+|            3 | 1700.00 |
+|            3 | 1100.00 |
+|            3 | 1500.00 |
+|            2 |    NULL |
++--------------+---------+
+4 rows in set (0.001 sec)
+----
+
+[source,sql]
+----
+SELECT COUNT(*) FROM Employees3 WHERE Salary IS NOT NULL;
++----------+
+| COUNT(*) |
++----------+
+|        9 |
++----------+
+1 row in set (0.016 sec)
+----
+
+[source,sql]
+----
+SELECT COUNT(Salary) FROM Employees3;
++---------------+
+| COUNT(Salary) |
++---------------+
+|             9 |
++---------------+
+1 row in set (0.000 sec)
+----
+
+==== Ús d'AVG i SUM amb GROUP BY
+
+Podem usar la funció AVG per tenir la mitjana de qualsevol grup, i SUM per
+obtenir-ne el total.
+
+.Ús de la funció AVG amb GROUP BY
+====
+[source,sql]
+----
+SELECT AVG(Quantity)
+ FROM Books
+ GROUP BY Type
+----
+====
+
+.Ús de la funció SUM amb GROUP BY
+====
+[source,sql]
+----
+SELECT SUM(Quantity)
+ FROM Books
+ GROUP BY Type
+----
+====
+
+.Ús d'ambdues funcions, AVG i SUM, amb GROUP BY
+====
+[source,sql]
+----
+SELECT FirstName, SUM(Salary) AS TotalSous, AVG(Salary) AS MitjanaSous FROM Employees3 GROUP BY FirstName;
++-----------+-----------+-------------+
+| FirstName | TotalSous | MitjanaSous |
++-----------+-----------+-------------+
+| Maria     |   3400.00 | 1700.000000 |
+| Marta     |   2200.00 | 1100.000000 |
+| Miquel    |   1700.00 | 1700.000000 |
+| Pere      |   4100.00 | 1366.666667 |
+| Sílvia    |   1500.00 | 1500.000000 |
++-----------+-----------+-------------+
+5 rows in set (0.001 sec)
+----
+====
+
+==== Ús de GROUP BY per més d'una columna
+
+És possible fer agrupacions per més d'una columna a la clàusula `GROUP BY`. En
+aquest cas, els grups estaran formats per tots els registres que tenen el
+mateix valor en tots els elements agrupats.
+
+Per exemple, imaginem la següent taula d'empleats:
+
+[source,sql]
+----
+SELECT * FROM Employees2;
++----+-----------+-----------+---------+
+| Id | FirstName | LastName  | Salary  |
++----+-----------+-----------+---------+
+|  1 | Maria     | Martínez  | 1700.00 |
+|  2 | Pere      | Prat      | 1100.00 |
+|  3 | Pere      | Garcia    | 1500.00 |
+|  4 | Marta     | Muñoz     | 1100.00 |
+|  5 | Maria     | Herrera   | 1700.00 |
+|  6 | Pere      | Rovira    | 1500.00 |
+|  7 | Miquel    | Armenter  | 1700.00 |
+|  8 | Sílvia    | Barba     | 1500.00 |
+|  9 | Pere      | Serrano   | 1100.00 |
+| 10 | Marta     | Perich    | 1400.00 |
+| 11 | Marta     | Nogué     | 1100.00 |
++----+-----------+-----------+---------+
+11 rows in set (0.000 sec)
+----
+
+La sentència següent agruparà els empleats que tinguin el mateix nom i sou.
+Així, tindrem dues Marta que cobren 1400, i una Marta que cobra 1100, etc.
+
+[source,sql]
+----
+SELECT COUNT(*), FirstName, Salary
+ FROM Employees2
+ GROUP BY FirstName, Salary;
+ +----------+-----------+---------+
+ | COUNT(*) | FirstName | Salary  |
+ +----------+-----------+---------+
+ |        2 | Maria     | 1700.00 |
+ |        2 | Marta     | 1100.00 |
+ |        1 | Marta     | 1400.00 |
+ |        1 | Miquel    | 1700.00 |
+ |        2 | Pere      | 1100.00 |
+ |        2 | Pere      | 1500.00 |
+ |        1 | Sílvia    | 1500.00 |
+ +----------+-----------+---------+
+ 7 rows in set (0.00 sec)
+----
+
+=== Restricció de files amb HAVING
+
+La clàusula HAVING es pot utilitzar per restringir files. És similar a la
+condició WHERE, excepte que HAVING fa referència a les columnes del resultat,
+mentre que WHERE fa referència a les columnes existents a la base de dades. A
+més, amb HAVING es poden utilitzar funcions d'agregació, cosa que no es pot fer
+amb WHERE.
+
+Vegem-ho amb alguns exemples sobre la taula `Employees`:
+
+[source,sql]
+----
+SELECT * FROM Employees;
++----+-----------+-----------+---------+
+| Id | FirstName | LastName  | Salary  |
++----+-----------+-----------+---------+
+|  1 | Maria     | Martínez  | 1700.00 |
+|  2 | Pere      | Prat      | 1100.00 |
+|  3 | Pere      | Garcia    | 1500.00 |
+|  4 | Marta     | Muñoz     | 1100.00 |
++----+-----------+-----------+---------+
+4 rows in set (0.00 sec)
+----
+
+Més amunt havíem estat buscant quants empleats teníem que cobressin cadascun
+dels sous possibles:
+
+[source,sql]
+----
+SELECT COUNT(*), Salary
+ FROM Employees
+ GROUP BY Salary
+ ORDER BY Salary DESC;
++----------+---------+
+| COUNT(*) | Salary  |
++----------+---------+
+|        1 | 1700.00 |
+|        1 | 1500.00 |
+|        2 | 1100.00 |
++----------+---------+
+3 rows in set (0.00 sec)
+----
+
+El que volem fer ara és veure només els sous pels quals hi ha un únic empleat
+que el cobra. Respecte als resultats anterior, la tercera fila ens sobra.
+
+Per resoldre aquesta consulta volem aplicar un filtre sobre la columna de
+resultats COUNT(*). Per poder-ho fer, primer de tot li posem un nom:
+
+[source,sql]
+----
+SELECT COUNT(*) AS Num, Salary
+ FROM Employees
+ GROUP BY Salary
+ ORDER BY Salary DESC;
++-----+---------+
+| Num | Salary  |
++-----+---------+
+|   1 | 1700.00 |
+|   1 | 1500.00 |
+|   2 | 1100.00 |
++-----+---------+
+3 rows in set (0.00 sec)
+----
+
+I ara ja podem utilitzar `HAVING` per filtrar els resultats:
+
+[source,sql]
+----
+SELECT COUNT(*) AS Num, Salary
+ FROM Employees
+ GROUP BY Salary
+ HAVING Num=1
+ ORDER BY Salary DESC;
++-----+---------+
+| Num | Salary  |
++-----+---------+
+|   1 | 1700.00 |
+|   1 | 1500.00 |
++-----+---------+
+2 rows in set (0.00 sec)
+----
+
+Noteu que era imprescindible utilitzar `HAVING`: no podem utilitzar `WHERE`
+perquè la columna `Num` no existeix a la taula `Employees` original:
+
+[source,sql]
+----
+SELECT COUNT(*) AS Num, Salary
+ FROM Employees
+ WHERE Num=1
+ GROUP BY Salary
+ ORDER BY Salary DESC;
+ERROR 1054 (42S22): Unknown column 'Num' in 'where clause'
+----
+
+En cas que una columna existeixi tant a la taula com als resultats, podríem
+utilitzar `WHERE` o `HAVING` i obtindríem els mateixos resultats. En aquest
+cas ens decantarem per `WHERE`, ja que això filtra abans de fer els grups i
+és més ràpid.
+
+Com exemple, podem veure quants empleats tenim per cada sou menor de 1400:
+
+[source,sql]
+----
+SELECT COUNT(*) AS Num, Salary
+ FROM Employees
+ WHERE Salary<1400
+ GROUP BY Salary
+ ORDER BY Salary DESC;
++-----+---------+
+| Num | Salary  |
++-----+---------+
+|   2 | 1100.00 |
++-----+---------+
+1 row in set (0.00 sec)
+----
+
+[source,sql]
+----
+SELECT COUNT(*) AS Num, Salary
+ FROM Employees
+ GROUP BY Salary
+ HAVING Salary<1400
+ ORDER BY Salary DESC;
++-----+---------+
+| Num | Salary  |
++-----+---------+
+|   2 | 1100.00 |
++-----+---------+
+1 row in set (0.00 sec)
+----
+
+Naturalment, no podrem utilitzar `HAVING` si la columna sobre la qual volem
+filtrar no existeix en els resultats:
+
+[source,sql]
+----
+SELECT COUNT(*) AS Num, Salary
+ FROM Employees
+ WHERE FirstName LIKE 'P%'
+ GROUP BY Salary
+ ORDER BY Salary DESC;
++-----+---------+
+| Num | Salary  |
++-----+---------+
+|   1 | 1500.00 |
+|   1 | 1100.00 |
++-----+---------+
+2 rows in set (0.00 sec)
+----
+
+[source,sql]
+----
+SELECT COUNT(*) AS Num, Salary
+ FROM Employees
+ GROUP BY Salary
+ HAVING FirstName LIKE 'P%'
+ ORDER BY Salary DESC;
+ERROR 1054 (42S22): Unknown column 'FirstName' in 'having clause'
+----
+
+Com hem vist, habitualment el `HAVING` acompanya al `GROUP BY`, però no sempre
+és així.
+
+En el següent exemple volem veure com quedaria el sou dels empleats si els hi
+apugéssim un 10%:
+
+[source,sql]
+----
+SELECT Id, FirstName, 1.1*Salary AS NewSalary
+FROM Employees;
++----+-----------+-----------+
+| Id | FirstName | NewSalary |
++----+-----------+-----------+
+|  1 | Maria     |  1870.000 |
+|  2 | Pere      |  1210.000 |
+|  3 | Pere      |  1650.000 |
+|  4 | Marta     |  1210.000 |
++----+-----------+-----------+
+4 rows in set (0.00 sec)
+----
+
+Modifiquem la consulta per veure només aquells empleats que després de l'apujada
+tindrien un sou per sota de 1800:
+
+[source,sql]
+----
+SELECT Id, FirstName, 1.1*Salary AS NewSalary
+ FROM Employees
+ WHERE 1.1*Salary<1800;
++----+-----------+-----------+
+| Id | FirstName | NewSalary |
++----+-----------+-----------+
+|  2 | Pere      |  1210.000 |
+|  3 | Pere      |  1650.000 |
+|  4 | Marta     |  1210.000 |
++----+-----------+-----------+
+3 rows in set (0.01 sec)
+----
+
+Noteu que hem hagut de repetir el càlcul del nou sou dues vegades. Això es pot
+evitar si el filtre s'aplica directament sobre la columna `NewSalary`,
+utilitzant `HAVING`:
+
+[source,sql]
+----
+SELECT Id, FirstName, 1.1*Salary AS NewSalary
+ FROM Employees
+ HAVING NewSalary<1800;
++----+-----------+-----------+
+| Id | FirstName | NewSalary |
++----+-----------+-----------+
+|  2 | Pere      |  1210.000 |
+|  3 | Pere      |  1650.000 |
+|  4 | Marta     |  1210.000 |
++----+-----------+-----------+
+3 rows in set (0.00 sec)
+----
+
+== Funcions integrades
+
+Hi ha moltes funcions integrades al MySQL, per tasques com:
+
+1. _Agregacions_: per calcular valors resum.
+2. _Conversions_: per transformar un tipus de dada en un altre.
+3. _Dates_: per tractar dates i temps.
+4. _Matemàtiques_: per realitzar operacions sobre dades numèriques.
+5. _Cadenes_: per realitzar operacions sobre cadenes de caràcters, dades
+binàries, o expressions.
+6. _Sistema_: per consultar informacions sobre la base de dades, o la
+configuració del SGBD.
+7. Altres: per cercar text, treballar amb XML, xifrar o comprimir dades, etc.
+
+A continuació es presenten algunes de les funcions més comunes:
+
+=== Funcions d'agregació
+
+Les funcions d'agregació realitzen un càlcul sobre un conjunt de valors i
+retornen un sol valor. La taula següent mostra algunes d'aquestes funcions:
+
+[width="100%",cols="<20%,<80%"]
+.Algunes funcions d'agregació i la seva descripció.
+|=======================================================================
+|*FUNCIÓ*|*DESCRIPCIÓ*
+|AVG|Retorna la mitjana de tots els valors (o, si s'especifica DISTINCT, dels
+valors diferents) de l'expressió.
+|COUNT|Retorna el nombre de valors no null de l'expressió. Quan s'especifica
+DISTINCT, COUNT troba el nombre de valors no nulls únics.
+|COUNT(*)|Retorna el número de files. COUNT(*) no agafa paràmetres i no es pot
+utilitzar amb DISTINCT.
+|MAX|Retorna el valor màxim de l'expressió. MAX es pot utilitzar amb columnes
+numèriques, de caràcters, i de temps o dates. Els valors NULL s'ignoren.
+|MIN|Com MAX, però retorna el valor mínim.
+|SUM|Retorna la seuma de tots els valors de l'expressió (o només dels valors
+diferents si s'especifica DISTINCT). Només es pot utilitzar amb columnes
+numèriques.
+|GROUP_CONCAT|Concatena totes les cadenes que van al mateix grup després d'un
+GROUP BY.
+|=======================================================================
+
+A sota hi ha exemples de cadascuna de les funcions d'agregació llistades a la
+taula anterior:
+
+====
+.Exemple d'AVG
+[source,sql]
+----
+SELECT AVG(list_price) FROM products;
++-----------------+
+| AVG(list_price) |
++-----------------+
+|     16.40500000 |
++-----------------+
+----
+====
+
+====
+.Exemple de COUNT
+[source,sql]
+----
+SELECT COUNT(minimum_reorder_quantity) FROM products;
++---------------------------------+
+| COUNT(minimum_reorder_quantity) |
++---------------------------------+
+|                              30 |
++---------------------------------+
+----
+====
+
+====
+.Exemple de COUNT (*)
+[source,sql]
+----
+SELECT COUNT(*) AS "Quantitat de productes" FROM products;
++------------------------+
+| Quantitat de productes |
++------------------------+
+|                     52 |
++------------------------+
+----
+====
+
+====
+.Exemple de MAX
+[source,sql]
+----
+SELECT MAX(list_price) FROM products;
++-----------------+
+| MAX(list_price) |
++-----------------+
+|         81.0000 |
++-----------------+
+----
+====
+
+====
+.Exemple de MIN
+[source,sql]
+----
+SELECT MIN(list_price) FROM products;
++-----------------+
+| MIN(list_price) |
++-----------------+
+|          1.2000 |
++-----------------+
+----
+====
+
+====
+.Exemple de SUM
+[source,sql]
+----
+SELECT SUM(shipping_fee) FROM orders;
++-------------------+
+| SUM(shipping_fee) |
++-------------------+
+|         2150.0000 |
++-------------------+
+----
+====
+
+====
+.Exemple de GROUP_CONCAT
+[source,sql]
+----
+SELECT category, GROUP_CONCAT(product_name) FROM products GROUP BY category;
++---------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| category                  | GROUP_CONCAT(product_name)                                                                                                                                                                                                      |
++---------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Baked Goods & Mixes       | Northwind Traders Brownie Mix,Northwind Traders Cake Mix,Northwind Traders Scones,Northwind Traders Chocolate Biscuits Mix                                                                                                      |
+| Beverages                 | Northwind Traders Chai,Northwind Traders Tea,Northwind Traders Coffee,Northwind Traders Green Tea,Northwind Traders Beer                                                                                                        |
+| Candy                     | Northwind Traders Chocolate                                                                                                                                                                                                     |
+| Canned Fruit & Vegetables | Northwind Traders Fruit Cocktail,Northwind Traders Pears,Northwind Traders Peaches,Northwind Traders Pineapple,Northwind Traders Cherry Pie Filling,Northwind Traders Peas,Northwind Traders Green Beans,Northwind Traders Corn |
+| Canned Meat               | Northwind Traders Tuna Fish,Northwind Traders Crab Meat,Northwind Traders Smoked Salmon                                                                                                                                         |
+| Cereal                    | Northwind Traders Hot Cereal,Northwind Traders Granola                                                                                                                                                                          |
+| Chips, Snacks             | Northwind Traders Potato Chips                                                                                                                                                                                                  |
+| Condiments                | Northwind Traders Syrup,Northwind Traders Mustard,Northwind Traders Cajun Seasoning                                                                                                                                             |
+| Dairy products            | Northwind Traders Mozzarella                                                                                                                                                                                                    |
+| Dried Fruit & Nuts        | Northwind Traders Dried Plums,Northwind Traders Dried Pears,Northwind Traders Walnuts,Northwind Traders Dried Apples,Northwind Traders Almonds                                                                                  |
+| Grains                    | Northwind Traders Long Grain Rice                                                                                                                                                                                               |
+| Jams, Preserves           | Northwind Traders Boysenberry Spread,Northwind Traders Marmalade                                                                                                                                                                |
+| Oil                       | Northwind Traders Olive Oil                                                                                                                                                                                                     |
+| Pasta                     | Northwind Traders Ravioli,Northwind Traders Gnocchi                                                                                                                                                                             |
+| Sauces                    | Northwind Traders Curry Sauce,Northwind Traders Tomato Sauce,Northwind Traders Hot Pepper Sauce                                                                                                                                 |
+| Soups                     | Northwind Traders Chicken Soup,Northwind Traders Vegetable Soup,Northwind Traders Clam Chowder                                                                                                                                  |
++---------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+----
+====
+
+=== Funcions de temps i dates
+
+MariaDB disposa d'un munt de funcions per facilitar el tractament de dates i
+temps. A continuació se'n  presenten algunes de les més importants.
+
+Al https://mariadb.com/kb/en/library/date-time-functions/[manual de MariaDB]
+tenim una llista resum de totes les funcions relacionades amb dates i temps.
+
+==== Obtenir parts d'una data
+
+Per obtenir les diferents parts d'una dada de tipus data podem utilitzar les
+funcions YEAR, MONTH i DAY. Per temps podem utilitzar HOUR, MINUTE i SECOND.
+
+En el següent exemple veiem l'ús d'aquestes funcions per descompondre una
+variable de tipus DATETIME en els seus components:
+
+[source,sql]
+----
+> SET @T='2016-09-29 15:23:12';
+Query OK, 0 rows affected (0.00 sec)
+
+> SELECT YEAR(@T), MONTH(@T), DAY(@T), HOUR(@T), MINUTE(@T), SECOND(@T);
++----------+-----------+---------+----------+------------+------------+
+| YEAR(@T) | MONTH(@T) | DAY(@T) | HOUR(@T) | MINUTE(@T) | SECOND(@T) |
++----------+-----------+---------+----------+------------+------------+
+|     2016 |         9 |      29 |       15 |         23 |         12 |
++----------+-----------+---------+----------+------------+------------+
+1 row in set (0.00 sec)
+----
+
+[source,sql]
+----
+> SELECT MAX(rental_date), DAY(MAX(rental_date)) AS dia FROM rental;
++---------------------+------+
+| max(rental_date)    | dia  |
++---------------------+------+
+| 2006-02-14 15:16:03 |   14 |
++---------------------+------+
+1 row in set (0.00 sec)
+----
+
+[source,sql]
+----
+> SELECT rental_date, MINUTE(rental_date) FROM rental LIMIT 5;
++---------------------+---------------------+
+| rental_date         | MINUTE(rental_date) |
++---------------------+---------------------+
+| 2005-05-24 22:53:30 |                  53 |
+| 2005-05-24 22:54:33 |                  54 |
+| 2005-05-24 23:03:39 |                   3 |
+| 2005-05-24 23:04:41 |                   4 |
+| 2005-05-24 23:05:21 |                   5 |
++---------------------+---------------------+
+5 rows in set (0.00 sec)
+----
+
+[source,sql]
+----
+> SELECT rental_date FROM rental WHERE HOUR(rental_date)=20;
++---------------------+
+| rental_date         |
++---------------------+
+| 2005-05-25 20:26:42 |
+| 2005-05-25 20:46:11 |
+| 2005-05-25 20:48:50 |
+| 2005-05-26 20:01:09 |
+| 2005-05-26 20:08:33 |
+| 2005-05-26 20:20:47 |
+| 2005-05-26 20:22:12 |
+...
+----
+
+També podem separar la data amb DATE i el temps amb TIME:
+
+[source,sql]
+----
+> SELECT DATE(@T), TIME(@T);
++------------+----------+
+| DATE(@T)   | TIME(@T) |
++------------+----------+
+| 2016-09-29 | 15:23:12 |
++------------+----------+
+1 row in set (0.00 sec)
+----
+
+==== Obtenir el temps actual
+
+NOW i SYSDATE retornar ambdues el temps actual, amb una petita diferència.
+NOW retorna el moment en què la sentència comença a executar-se, mentre que
+SYSDATE retorna el moment exacte en què s'executa la funció.
+
+En el següent exemple podem veure la diferència entre les dues:
+
+[source,sql]
+----
+> SELECT NOW(), SLEEP(2), NOW();
++---------------------+----------+---------------------+
+| NOW()               | SLEEP(2) | NOW()               |
++---------------------+----------+---------------------+
+| 2016-10-01 12:02:21 |        0 | 2016-10-01 12:02:21 |
++---------------------+----------+---------------------+
+1 row in set (2.00 sec)
+
+> SELECT SYSDATE(), SLEEP(2), SYSDATE();
++---------------------+----------+---------------------+
+| SYSDATE()           | SLEEP(2) | SYSDATE()           |
++---------------------+----------+---------------------+
+| 2016-10-01 12:02:34 |        0 | 2016-10-01 12:02:36 |
++---------------------+----------+---------------------+
+1 row in set (2.00 sec)
+----
+
+==== Càlcul de dates
+
+Les funcions ADDDATE i DATE_ADD permeten sumar períodes de temps a una data.
+ADDDATE permet sumar un cert nombre de dies directament. Tant una com l'altra
+permeten especificar altres períodes de temps a sumar:
+
+[source,sql]
+----
+> SELECT @T;
++---------------------+
+| @T                  |
++---------------------+
+| 2016-09-29 15:23:12 |
++---------------------+
+1 row in set (0.00 sec)
+
+> SELECT ADDDATE(@T, 5);
++---------------------+
+| ADDDATE(@T, 5)      |
++---------------------+
+| 2016-10-04 15:23:12 |
++---------------------+
+1 row in set (0.00 sec)
+
+> SELECT ADDDATE(@T, INTERVAL 20 HOUR);
++-------------------------------+
+| ADDDATE(@T, INTERVAL 20 HOUR) |
++-------------------------------+
+| 2016-09-30 11:23:12           |
++-------------------------------+
+1 row in set (0.00 sec)
+
+> SELECT DATE_ADD(@T, INTERVAL 20 HOUR);
++--------------------------------+
+| DATE_ADD(@T, INTERVAL 20 HOUR) |
++--------------------------------+
+| 2016-09-30 11:23:12            |
++--------------------------------+
+1 row in set (0.00 sec)
+----
+
+Les funcions SUBDATE i DATE_SUB treballen de forma anàloga a ADDDATE i
+DATE_ADD, però resten el període de temps indicat:
+
+[source,sql]
+----
+> SELECT @T;
++---------------------+
+| @T                  |
++---------------------+
+| 2016-09-29 15:23:12 |
++---------------------+
+1 row in set (0.00 sec)
+
+> SELECT SUBDATE(@T, 60);
++---------------------+
+| SUBDATE(@T, 60)     |
++---------------------+
+| 2016-07-31 15:23:12 |
++---------------------+
+1 row in set (0.00 sec)
+
+> SELECT DATE_SUB(@t, INTERVAL 1000 SECOND);
++------------------------------------+
+| DATE_SUB(@t, INTERVAL 1000 SECOND) |
++------------------------------------+
+| 2016-09-29 15:06:32                |
++------------------------------------+
+1 row in set (0.00 sec)
+----
+
+La funció DATEDIFF retorna els dies que han passat entre dues dates:
+
+[source,sql]
+----
+> SELECT DATEDIFF('2017-01-15', '2017-01-10');
++--------------------------------------+
+| DATEDIFF('2017-01-15', '2017-01-10') |
++--------------------------------------+
+|                                    5 |
++--------------------------------------+
+1 row in set (0.00 sec)
+----
+
+==== Format de les dates
+
+El MySQL/MariaDB ens retorna les dates en format anglès: primer l'any, després
+el mes i finalment el dia, separats per guions. En ocasions volem recuperar
+una data, però que la cadena de text obtinguda tingui altres formats. Per això
+utilitzem la funció DATE_FORMAT.
+
+DATE_FORMAT rep dos paràmetres: la data a transformar, i una cadena de text
+que especifica en quin format la volem. En aquesta cadena de text podem
+utilitzar una sèrie de caràcters que especifiquen el format concret que volem.
+Per exemple, %H retorna l'hora, de 0 a 23, o %d retorna el dia del mes.
+
+A https://mariadb.com/kb/en/library/date_format/[la referència de DATE_FORMAT]
+podem trobar la llista completa de caràcters especials que podem utilitzar.
+
+[source,sql]
+----
+> SELECT DATE_FORMAT(@T, "%d-%m-%Y");
++-----------------------------+
+| DATE_FORMAT(@T, "%d-%m-%Y") |
++-----------------------------+
+| 29-09-2016                  |
++-----------------------------+
+1 row in set (0.00 sec)
+----
+
+=== Funcions matemàtiques
+
+Les funcions matemàtiques realitzen operacions sobre dades numèriques. Algunes
+de les funcions més utilitzades són: ROUND per arrodonir nombres al nombre
+enter més proper, FLOOR per eliminar la part decimal d'un nombre, CEIL per
+arrodonir a l'alça un nombre, POW per calcular una potència, o SQRT per calcular
+una arrel quadrada.
+
+[source,sql]
+----
+> SELECT ROUND(5.7), FLOOR(5.7), CEIL(5.2), POW(2,6), SQRT(36);
++------------+------------+-----------+----------+----------+
+| ROUND(5.7) | FLOOR(5.7) | CEIL(5.2) | POW(2,6) | SQRT(36) |
++------------+------------+-----------+----------+----------+
+|          6 |          5 |         6 |       64 |        6 |
++------------+------------+-----------+----------+----------+
+1 row in set (0.00 sec)
+----
+
+=== Funcions de hash i contrasenyes
+
+Les funcions de hash són funcions que permeten calcular un nombre (hexadecimal)
+a partir d'un text, amb la propietat que la probabilitat que dos textos tinguin
+el mateix hash és molt baixa.
+
+Algunes funcions de hash són MD5, SHA o SHA2 són exemples de funcions de hash.
+SHA2 admet diverses longituds per a la cadena resultant.
+
+Les funcions de hash s'utilitzen per a xifrar contrasenyes, comprovar que dos
+fitxers són idèntics (per exemple, que un fitxer que hem baixat d'internet és
+igual que l'original), etc.
+
+[source,sql]
+----
+> SELECT MD5('hola');
++----------------------------------+
+| MD5('hola')                      |
++----------------------------------+
+| 4d186321c1a7f0f354b297e8914ab240 |
++----------------------------------+
+1 row in set (0.00 sec)
+
+> SELECT SHA('hola');
++------------------------------------------+
+| SHA('hola')                              |
++------------------------------------------+
+| 99800b85d3383e3a2fb45eb7d0066a4879a9dad0 |
++------------------------------------------+
+1 row in set (0.00 sec)
+
+> SELECT SHA2('hola',256);
++------------------------------------------------------------------+
+| SHA2('hola',256)                                                 |
++------------------------------------------------------------------+
+| b221d9dbb083a7f33428d7c2a3c3198ae925614d70210e28716ccaa7cd4ddb79 |
++------------------------------------------------------------------+
+1 row in set (0.00 sec)
+----
+
+[WARNING]
+====
+El xifrat segur de contrasenyes és molt més complicat que això i és convenient
+utilitzar mètodes segurs que proporcionin els frameworks que utilitzem per a la
+nostra aplicació, en comptes de crear els nostres propis sistemes.
+====
+
+=== Funcions per cadenes
+
+De les funcions per tractar cadena, la que probablement és més útil és *CONCAT*.
+Aquesta funció permet unir diverses cadenes en una de sola:
+
+[source,sql]
+----
+> SELECT CONCAT('Hola',' ','món');
++---------------------------+
+| CONCAT('Hola',' ','món')  |
++---------------------------+
+| Hola món                  |
++---------------------------+
+1 row in set (0.00 sec)
+----
+
+CONCAT és especialment útil quan una part de la cadena és un literal conegut i
+una altra part és el resultat d'una consulta:
+
+[source,sql]
+----
+> SELECT CONCAT(first_name, ' ', last_name) FROM customer LIMIT 3;
++------------------------------------+
+| CONCAT(first_name, ' ', last_name) |
++------------------------------------+
+| MARY SMITH                         |
+| PATRICIA JOHNSON                   |
+| LINDA WILLIAMS                     |
++------------------------------------+
+3 rows in set (0.00 sec)
+----
+
+Podem consultar la llista de funcions per cadenes a
+link:https://mariadb.com/kb/en/library/string-functions/[String Functions].
+
+Alguna altra funció habitual:
+
+- Obtenir la longitud (en caràcters) d'una cadena:
++
+[source,sql]
+----
+SELECT CHAR_LENGTH(first_name), first_name FROM customers;
++-------------------------+------------+
+| CHAR_LENGTH(first_name) | first_name |
++-------------------------+------------+
+|                       5 | Agata      |
+|                       6 | Alford     |
+|                       9 | Ammamaria  |
+|                       6 | Belita     |
+|                       9 | Concordia  |
+|                       6 | Dolley     |
+|                       5 | Dredi      |
+|                       4 | Emma       |
+|                       8 | Filberto   |
+|                       5 | Gipsy      |
+|                       6 | Hannie     |
+|                       4 | Joni       |
+|                       4 | Jude       |
+|                       5 | Judye      |
+|                       5 | Kasey      |
+|                       8 | Lorianne   |
+|                       4 | Mace       |
+|                       5 | Marco      |
+|                       5 | Marga      |
+|                       6 | Marnie     |
+|                       6 | Mendel     |
+|                       6 | Orelia     |
+|                       6 | Pieter     |
+|                       5 | Rhody      |
+|                       9 | Shandeigh  |
+|                       6 | Sumner     |
+|                       6 | Tessie     |
+|                       9 | Thorndike  |
+|                       6 | Trixie     |
++-------------------------+------------+
+29 rows in set (0.037 sec)
+----
+
+- Obtenir les primeres lletres d'una cadena:
++
+[source,sql]
+----
+SELECT LEFT(first_name, 2), first_name FROM customers;
++---------------------+------------+
+| LEFT(first_name, 2) | first_name |
++---------------------+------------+
+| Ag                  | Agata      |
+| Al                  | Alford     |
+| Am                  | Ammamaria  |
+| Be                  | Belita     |
+| Co                  | Concordia  |
+| Do                  | Dolley     |
+| Dr                  | Dredi      |
+| Em                  | Emma       |
+| Fi                  | Filberto   |
+| Gi                  | Gipsy      |
+| Ha                  | Hannie     |
+| Jo                  | Joni       |
+| Ju                  | Jude       |
+| Ju                  | Judye      |
+| Ka                  | Kasey      |
+| Lo                  | Lorianne   |
+| Ma                  | Mace       |
+| Ma                  | Marco      |
+| Ma                  | Marga      |
+| Ma                  | Marnie     |
+| Me                  | Mendel     |
+| Or                  | Orelia     |
+| Pi                  | Pieter     |
+| Rh                  | Rhody      |
+| Sh                  | Shandeigh  |
+| Su                  | Sumner     |
+| Te                  | Tessie     |
+| Th                  | Thorndike  |
+| Tr                  | Trixie     |
++---------------------+------------+
+29 rows in set (0.000 sec)
+----
+
+=== Funcions de control de l'execució
+
+Algunes funcions, com IF o IFNULL permeten realitzar diverses operacions
+depenent del resultat d'una comparació:
+
+[source,sql]
+----
+> SET @A=3;
+Query OK, 0 rows affected (0.00 sec)
+
+> SET @B=4;
+Query OK, 0 rows affected (0.00 sec)
+
+> SELECT IF(@A<@B,
+->  CONCAT(@A,' és més petit que ', @B),
+->  CONCAT(@A,' és més gran o igual que ',@B)
+->) AS resultat;
++------------------------+
+| resultat               |
++------------------------+
+| 3 és més petit que 4   |
++------------------------+
+1 row in set (0.00 sec)
+----
+
+IFNULL retorna el primer paràmetre si aquest és diferent que NULL, i el segon
+paràmetre si el primer és NULL:
+
+[source,sql]
+----
+> SELECT IFNULL(3, 4);
++--------------+
+| IFNULL(3, 4) |
++--------------+
+|            3 |
++--------------+
+1 row in set (0.00 sec)
+
+> SELECT IFNULL(NULL, 4);
++-----------------+
+| IFNULL(NULL, 4) |
++-----------------+
+|               4 |
++-----------------+
+1 row in set (0.00 sec)
+----
+
+[source,sql]
+----
+> SELECT return_date, IF(return_date>='2005-06-01', 'Després de maig de 2005', 'Abans de juny de 2005') AS comentari
+  FROM rental LIMIT 10;
++---------------------+--------------------------+
+| return_date         | comentari                |
++---------------------+--------------------------+
+| 2005-05-26 22:04:30 | Abans de juny de 2005    |
+| 2005-05-28 19:40:33 | Abans de juny de 2005    |
+| 2005-06-01 22:12:39 | Després de maig de 2005  |
+| 2005-06-03 01:43:41 | Després de maig de 2005  |
+| 2005-06-02 04:33:21 | Després de maig de 2005  |
+| 2005-05-27 01:32:07 | Abans de juny de 2005    |
+| 2005-05-29 20:34:53 | Abans de juny de 2005    |
+| 2005-05-27 23:33:46 | Abans de juny de 2005    |
+| 2005-05-28 00:22:40 | Abans de juny de 2005    |
+| 2005-05-31 22:44:21 | Abans de juny de 2005    |
++---------------------+--------------------------+
+10 rows in set (0.00 sec)
+----
+
+[source,sql]
+----
+> SELECT return_date, IF(return_date>'2005-06-01', DAY(return_date), MONTH(return_date)) AS comentari FROM rental LIMIT 10;
++---------------------+-----------+
+| return_date         | comentari |
++---------------------+-----------+
+| 2005-05-26 22:04:30 |         5 |
+| 2005-05-28 19:40:33 |         5 |
+| 2005-06-01 22:12:39 |         1 |
+| 2005-06-03 01:43:41 |         3 |
+| 2005-06-02 04:33:21 |         2 |
+| 2005-05-27 01:32:07 |         5 |
+| 2005-05-29 20:34:53 |         5 |
+| 2005-05-27 23:33:46 |         5 |
+| 2005-05-28 00:22:40 |         5 |
+| 2005-05-31 22:44:21 |         5 |
++---------------------+-----------+
+10 rows in set (0.00 sec)
+----
+
+[source,sql]
+----
+> SELECT IFNULL(return_date, 'Pel·lícula no retornada!') FROM rental;
+...
+| 2005-08-25 22:12:46                       |
+| 2005-08-26 22:43:25                       |
+| 2005-08-24 20:08:39                       |
+| Pel·lícula no retornada!                  |
+| 2005-08-29 14:51:06                       |
+| 2005-08-24 15:07:29                       |
+| 2005-08-31 23:50:30                       |
+| 2005-08-24 18:07:24                       |
+...
+----
+
+== Unió de taules (JOIN)
+
+La unió de dues o més taules és el procés de comparar les dades a les columnes
+que s'especifiquin i d'utilitzar els resultats de la comparació per formar un
+nou conjunt de dades amb les files que se seleccionin.
+
+Una sentència d'unió:
+
+* Especifica una o més columnes de cadascuna de les taules.
+* Compara els valors d'aquestes columnes fila per fila.
+* Combina les files amb els valors que compleixin algun criteri en una nova
+fila.
+
+El més habitual és que el criteri d'unió d'un JOIN sigui que la clau primària
+d'una de les taules ha de coincidir amb la clau forana relacionada de l'altra
+taula, però és possible crear qualsevol altre criteri que necessitem.
+
+A continuació es descriuen tots els tipus de JOIN que hi ha: INNER JOIN,
+LEFT (OUTER), RIGHT (OUTER), i CROSS JOIN.
+
+Per exemplificar els diversos tipus de JOIN que hi ha utilitzarem les taules
+següents:
+
+[source,sql]
+----
+> SELECT * FROM Students;
++----+------------+-----------+
+| Id | Name       | AdvisorId |
++----+------------+-----------+
+|  1 | Student 1  |         1 |
+|  2 | Student 2  |         1 |
+|  3 | Student 3  |         2 |
+|  4 | Student 4  |         2 |
+|  5 | Student 5  |         2 |
+|  6 | Student 6  |         2 |
+|  7 | Student 7  |         2 |
+|  8 | Student 8  |      NULL |
+|  9 | Student 9  |         4 |
+| 10 | Student 10 |         4 |
+| 11 | Student 11 |      NULL |
+| 12 | Student 12 |         4 |
++----+------------+-----------+
+12 rows in set (0.00 sec)
+
+> SELECT * FROM Advisors;
++----+-----------+
+| Id | Name      |
++----+-----------+
+|  1 | Advisor 1 |
+|  2 | Advisor 2 |
+|  3 | Advisor 3 |
+|  4 | Advisor 4 |
++----+-----------+
+4 rows in set (0.00 sec)
+----
+
+=== Unió interior (INNER JOIN)
+
+Una _INNER JOIN_ connecta dues taules utilitzant algun criteri sobre les seves
+columnes.
+
+Només es retornen les files d'una taula per a les quals existeix alguna fila
+de l'altra taula que li correspon segons el criteri establert.
+
+Habitualment, posarem JOIN sense especificar el tipus d'unió a què fem
+referència quan vulguem utilitzar una INNER JOIN.
+
+Vegem un exemple per comprovar com es comporta una INNER JOIN:
+
+[source,sql]
+----
+> SELECT * FROM Students s
+ JOIN Advisors a ON s.AdvisorId=a.Id;
++----+------------+-----------+----+-----------+
+| Id | Name       | AdvisorId | Id | Name      |
++----+------------+-----------+----+-----------+
+|  1 | Student 1  |         1 |  1 | Advisor 1 |
+|  2 | Student 2  |         1 |  1 | Advisor 1 |
+|  3 | Student 3  |         2 |  2 | Advisor 2 |
+|  4 | Student 4  |         2 |  2 | Advisor 2 |
+|  5 | Student 5  |         2 |  2 | Advisor 2 |
+|  6 | Student 6  |         2 |  2 | Advisor 2 |
+|  7 | Student 7  |         2 |  2 | Advisor 2 |
+|  9 | Student 9  |         4 |  4 | Advisor 4 |
+| 10 | Student 10 |         4 |  4 | Advisor 4 |
+| 12 | Student 12 |         4 |  4 | Advisor 4 |
++----+------------+-----------+----+-----------+
+10 rows in set (0.00 sec)
+----
+
+A l'exemple veiem que no han aparegut els estudiants 8 i 13 perquè no estan
+aparellats amb cap dels tutors. Tampoc ha aparegut el tutor 3, que no té cap
+estudiant assignat.
+
+=== Unió exterior esquerra (LEFT OUTER JOIN)
+
+Una _LEFT OUTER JOIN_ especifica que totes les files de la taula de l'esquerra
+(la primera que s'anomena) s'han de retornar. En canvi, només es retornaran
+les files de la taula de la dreta que tinguin alguna coincidència amb les
+files de la taula de l'esquerra.
+
+Habitualment utilitzem l'expressió LEFT JOIN per referir-nos a una LEFT OUTER
+JOIN.
+
+Al següent exemple podem veure el comportament de la LEFT JOIN:
+
+[source,sql]
+----
+> SELECT * FROM Students s
+  LEFT JOIN Advisors a ON s.AdvisorId=a.Id;
++----+------------+-----------+------+-----------+
+| Id | Name       | AdvisorId | Id   | Name      |
++----+------------+-----------+------+-----------+
+|  1 | Student 1  |         1 |    1 | Advisor 1 |
+|  2 | Student 2  |         1 |    1 | Advisor 1 |
+|  3 | Student 3  |         2 |    2 | Advisor 2 |
+|  4 | Student 4  |         2 |    2 | Advisor 2 |
+|  5 | Student 5  |         2 |    2 | Advisor 2 |
+|  6 | Student 6  |         2 |    2 | Advisor 2 |
+|  7 | Student 7  |         2 |    2 | Advisor 2 |
+|  8 | Student 8  |      NULL | NULL | NULL      |
+|  9 | Student 9  |         4 |    4 | Advisor 4 |
+| 10 | Student 10 |         4 |    4 | Advisor 4 |
+| 11 | Student 11 |      NULL | NULL | NULL      |
+| 12 | Student 12 |         4 |    4 | Advisor 4 |
++----+------------+-----------+------+-----------+
+12 rows in set (0.00 sec)
+----
+
+Podem veure que ara apareixen tots els estudiants, fins i tot els que no tenen
+tutor assignat. En canvi, el tutor 3 segueix sense aparèixer.
+
+=== Unió exterior dreta (RIGHT OUTER JOIN)
+
+Una _RIGHT OUTER JOIN_ inclou sempre entre els seus resultats totes les files
+de la taula de la dreta, i les files que corresponguin de la taula
+de l'esquerra.
+
+L'expressió RIGHT JOIN és un sinònim per RIGHT OUTER JOIN.
+
+Podem veure el resultat d'aplicar un RIGHT JOIN al següent exemple:
+
+[source,sql]
+----
+> SELECT * FROM Students s
+  RIGHT JOIN Advisors a ON s.AdvisorId=a.Id;
++------+------------+-----------+----+-----------+
+| Id   | Name       | AdvisorId | Id | Name      |
++------+------------+-----------+----+-----------+
+|    1 | Student 1  |         1 |  1 | Advisor 1 |
+|    2 | Student 2  |         1 |  1 | Advisor 1 |
+|    3 | Student 3  |         2 |  2 | Advisor 2 |
+|    4 | Student 4  |         2 |  2 | Advisor 2 |
+|    5 | Student 5  |         2 |  2 | Advisor 2 |
+|    6 | Student 6  |         2 |  2 | Advisor 2 |
+|    7 | Student 7  |         2 |  2 | Advisor 2 |
+| NULL | NULL       |      NULL |  3 | Advisor 3 |
+|    9 | Student 9  |         4 |  4 | Advisor 4 |
+|   10 | Student 10 |         4 |  4 | Advisor 4 |
+|   12 | Student 12 |         4 |  4 | Advisor 4 |
++------+------------+-----------+----+-----------+
+11 rows in set (0.00 sec)
+----
+
+En aquest cas veiem que tots els tutors apareixen almenys un cop entre els
+resultats. El tutor 3, que no té alumnes assignats, apareix emparellat amb
+NULL. Els estudiants 8 i 13 no formen part dels resultats.
+
+=== Unió creuada (CROSS JOIN)
+
+Una _CROSS JOIN_ uneix les dues taules, combinant totes les files d'una amb
+totes les files de l'altra. És un tipus d'unió molt diferent de les anteriors,
+perquè no utilitza cap condició d'unió, sinó que crea totes les combinacions
+possibles entre les files de les dues taules:
+
+[source,sql]
+----
+> SELECT * FROM Students s
+  CROSS JOIN Advisors a;
++----+------------+-----------+----+-----------+
+| Id | Name       | AdvisorId | Id | Name      |
++----+------------+-----------+----+-----------+
+|  1 | Student 1  |         1 |  1 | Advisor 1 |
+|  1 | Student 1  |         1 |  2 | Advisor 2 |
+|  1 | Student 1  |         1 |  3 | Advisor 3 |
+|  1 | Student 1  |         1 |  4 | Advisor 4 |
+|  2 | Student 2  |         1 |  1 | Advisor 1 |
+|  2 | Student 2  |         1 |  2 | Advisor 2 |
+|  2 | Student 2  |         1 |  3 | Advisor 3 |
+|  2 | Student 2  |         1 |  4 | Advisor 4 |
+...
+| 11 | Student 11 |      NULL |  1 | Advisor 1 |
+| 11 | Student 11 |      NULL |  2 | Advisor 2 |
+| 11 | Student 11 |      NULL |  3 | Advisor 3 |
+| 11 | Student 11 |      NULL |  4 | Advisor 4 |
+| 12 | Student 12 |         4 |  1 | Advisor 1 |
+| 12 | Student 12 |         4 |  2 | Advisor 2 |
+| 12 | Student 12 |         4 |  3 | Advisor 3 |
+| 12 | Student 12 |         4 |  4 | Advisor 4 |
++----+------------+-----------+----+-----------+
+48 rows in set (0.00 sec)
+----
+
+En MySQL/MariaDB es pot utilitzar un CROSS JOIN com un INNER JOIN, simplement
+afegint la condició d'unió.
+
+=== Exemples
+
+Els següents exemples estan basats en la base de dades
+link:Miniwind[db/mariadb/miniwind.sql].
+
+====
+Mostra el nom i cognom del client que ha fet la comanda número 32.
+
+[source,sql]
+----
+SELECT first_name, last_name
+ FROM customers c
+ JOIN orders o ON o.customer_id=c.id
+ WHERE o.id=32;
+----
+====
+
+====
+Mostra els clients que tenen menys de 5 comandes. Per a cada client volem el
+seu codi, el seu nom complet, i la quantitat de comandes fetes.
+
+[source,sql]
+----
+SELECT c.id, c.first_name, c.last_name, COUNT(o.id) AS n_orders
+ FROM customers c
+ LEFT JOIN orders o ON c.id = o.customer_id
+ GROUP BY c.id, c.first_name, c.last_name
+ HAVING n_orders < 5;
+----
+
+En aquest cas cal utilitzar una LEFT JOIN per garantir que apareixen els
+clients que no tenen cap comanda feta.
+====
+
+En aquest últim exemple és important notar l'ús de `COUNT(o.id)`: per a cada
+client estem comptant quantes comandes li han estat associades a través del
+JOIN, i utilitzem la clau primària d'`orders` per fer-ho.
+
+Noteu que si utilitzem `COUNT(*)` estem comptant quants cops apareixia el client
+abans de fer l'agrupació, i després de la JOIN. Com que tots els clients han
+d'aparèixer almenys un cop degut a la LEFT JOIN, ens trobarem que pels clients
+pels quals no hi ha cap comanda relacionada aquest recompte dóna 1 en comptes de
+0.
+
+====
+Mostra els productes que ha comprat la Marga Gladhill. De cada producte volem
+saber-ne el seu nom i la data en què l'ha comprat. La llista ha d'estar
+ordenada pel nom del producte.
+
+[source,sql]
+----
+SELECT o.order_date, p.product_name
+ FROM products p
+ JOIN order_details od ON od.product_id = p.id
+ JOIN orders o ON od.order_id = o.id
+ JOIN customers c ON c.id = o.customer_id
+ WHERE c.first_name LIKE 'Marga'
+  AND c.last_name LIKE 'Gladhill'
+ ORDER BY p.product_name;
+----
+====
+
+La major part de vegades utilitzarem l'operador = en una clàusula JOIN, però
+això no és obligatori. També, habitualment unirem taules a través de les
+claus foranes, però això tampoc és imprescindible. En el següent exemple veiem
+un cas de JOIN en què no es fa cap d'aquestes dues coses:
+
+====
+Volem saber si hi ha algun client que tingui el mateix nom o cognom que algun
+dels empleats. Mostra el nom i cognom dels clients seleccionats.
+
+[source,sql]
+----
+SELECT c.first_name, c.last_name
+ FROM customers c
+ JOIN employees e ON (c.first_name=e.first_name OR c.last_name=e.last_name);
+----
+====
+
+Aquesta mateixa consulta es pot resoldre amb un CROSS JOIN. Obtindrem totes
+les possibles combinacions entre clients i empleats, i amb un WHERE
+seleccionarem només aquelles que ens interessen:
+
+[source,sql]
+----
+SELECT c.first_name, c.last_name
+ FROM customers c
+ CROSS JOIN employees e
+ WHERE c.first_name=e.first_name
+  OR c.last_name=e.last_name;
+----
+
+=== FROM de més d'una taula
+
+L'SQL permet posar diverses taules a la clàusula FROM, separades per comes.
+A la pràctica, això és el mateix que un JOIN, però té dos inconvenients:
+
+- Com que no podem posar LEFT o RIGHT, sempre és equivalent a un INNER JOIN,
+i no podem forçar que una de les taules ens aparegui sencera.
+
+- La condició d'unió s'ha de posar a la clàusula WHERE i això fa que es
+confonguin els filtres amb les clàusules d'unió entre taules.
+
+Per aquests motius, es recomana utilitzar sempre JOIN, encara que val la pena
+saber que això es pot fer perquè es tracta d'una pràctica força estesa.
+
+Com exemples, veurem com es podrien escriure algunes de les sentències d'exemple
+de l'apartat anterior utilitzant només FROM i WHERE:
+
+====
+Mostra el nom i cognom del client que ha fet la comanda número 32.
+
+[source,sql]
+----
+SELECT first_name, last_name
+ FROM customers c, orders o
+ WHERE o.customer_id=c.id
+  AND o.id=32;
+----
+====
+
+====
+Mostra els productes que ha comprat la Marga Gladhill. De cada producte volem
+saber-ne el seu nom i la data en què l'ha comprat. La llista ha d'estar
+ordenada pel nom del producte.
+
+[source,sql]
+----
+SELECT o.order_date, p.product_name
+ FROM products p, order_details od, orders o, customers c
+ WHERE od.product_id = p.id
+  AND od.order_id = o.id
+  AND c.id = o.customer_id
+  AND c.first_name LIKE 'Marga'
+  AND c.last_name LIKE 'Gladhill'
+ ORDER BY p.product_name;
+----
+====
+
+====
+Volem saber si hi ha algun client que tingui el mateix nom o cognom que algun
+dels empleats. Mostra el nom i cognom dels clients seleccionats.
+
+[source,sql]
+----
+SELECT c.first_name, c.last_name
+ FROM customers c, employees e
+ WHERE c.first_name=e.first_name
+  OR c.last_name=e.last_name;
+----
+====
+
+[NOTE]
+====
+Sovint es diu que aquest ús de FROM és menys eficient que l'equivalent en JOIN.
+Això no té per què ser cert actualment, ja que l'optimitzador de consultes dels
+SGBD moderns tracta les dues formes de fer la consulta de la mateixa manera.
+====
+
+== Subconsultes
+
+En algunes ocasions no és possible realitzar una consulta completa en una sola
+sentència, o resulta molt complicat. En aquests casos podem realitzar una
+_subconsulta_, que consisteix a inserir una consulta SELECT com a part d'una
+altra sentència més gran.
+
+=== Subconsultes amb operadors de comparació
+
+Les subconsultes se solen utilitzar a una de les bandes d'operadors com =, <, >,
+<=, >= o IN.
+
+====
+A la base de dades Northwind, volem saber quins productes s'han d'encarregar
+en quantitats més grans (*reorder_level*).
+
+Per fer això, primer hem de saber quin és el màxim a *reorder_level* i després
+veure quins productes tenen exactament aquest *reorder_level*:
+
+[source,sql]
+----
+SELECT product_name, reorder_level
+ FROM products
+ WHERE reorder_level = (
+   SELECT MAX(reorder_level) FROM products
+ );
++----------------------------------+---------------+
+| product_name                     | reorder_level |
++----------------------------------+---------------+
+| Northwind Traders Green Tea      |           100 |
+| Northwind Traders Vegetable Soup |           100 |
+| Northwind Traders Chicken Soup   |           100 |
++----------------------------------+---------------+
+3 rows in set (0.00 sec)
+----
+====
+
+Com es pot veure, una subconsulta sempre ha d'anar entre parèntesis.
+
+A més, en la majoria dels casos, una subconsulta:
+
+- ha de retornar una sola fila (excepció: en l'operador IN),
+- ha de retornar una sola columna.
+
+==== Subconsultes i l'operador IN
+
+El següent exemple mostra com utilitzar una subconsulta amb l'operador IN:
+
+====
+A la base de dades Northwind, cerca els clients que van fer alguna comanda
+el 24 de maig de 2006.
+
+[source,sql]
+----
+SELECT id, first_name, last_name
+ FROM customers c
+ WHERE id IN (
+   SELECT customer_id
+    FROM orders
+    WHERE order_date='2006-05-24'
+ )
+ ORDER BY id;
+
++----+------------+-----------+
+| id | first_name | last_name |
++----+------------+-----------+
+|  1 | Anna       | Bedecs    |
+|  7 | Ming-Yang  | Xie       |
+|  8 | Elizabeth  | Andersen  |
+| 10 | Roland     | Wacker    |
+| 11 | Peter      | Krschne   |
++----+------------+-----------+
+5 rows in set (0.00 sec)
+----
+
+La mateixa consulta es pot fer sense subconsulta:
+
+[source,sql]
+----
+SELECT DISTINCT c.id, first_name, last_name
+ FROM customers c
+ JOIN orders o ON c.id=o.customer_id
+ WHERE order_date='2006-05-24'
+ ORDER BY c.id;
+----
+====
+
+El següent exemple mostra com utilitzar una subconsulta amb l'operador IN,
+comparant diversos camps simultàniament:
+
+====
+A la base de dades Northwind, volem trobar tots els empleats que tenen el mateix
+ofici i es troben a la mateixa ciutat que l'empleada que té per cognom
+Freehafer.
+
+Aquesta consulta es pot resoldre amb la següent sintaxis de IN, que permet
+comparar diverses columnes simultàniament:
+
+[source,sql]
+----
+SELECT id, first_name, last_name
+ FROM employees
+ WHERE (job_title, city) IN (
+   SELECT job_title, city
+    FROM employees
+    WHERE last_name LIKE 'Freehafer'
+ );
+----
+
+La mateixa resposta es pot obtenir amb la següent consulta, que utilitza una
+clàusula JOIN amb una condició d'unió múltiple:
+
+[source,sql]
+----
+SELECT e.id, e.first_name, e.last_name
+ FROM employees e
+ JOIN employees e2 ON e.job_title=e2.job_title
+  AND e.city=e2.city
+ WHERE e2.last_name LIKE 'Freehafer';
+----
+====
+
+==== Operador IN i LIMIT
+
+El MariaDB/MySQL presenta una limitació quan es combina l'operador IN amb una
+subconsulta que conté la clàusula LIMIT.
+
+Analitzem el problema utilitzant un exemple:
+
+====
+Retorna els cinc clients que han fet més comandes.
+
+Una consulta que podem provar per resoldre aquest enunciat és la següent:
+
+[source,sql]
+----
+SELECT id, first_name, last_name
+ FROM customers
+ WHERE id IN (
+   SELECT customer_id
+    FROM orders
+    GROUP BY customer_id
+    ORDER BY COUNT(*) DESC
+    LIMIT 5
+ )
+ ORDER BY id;
+----
+
+Aquí, la subconsulta cerca l'identificador dels clients amb més comandes, i la
+consulta principal recupera les dades dels clients seleccionats.
+
+Si provem d'executar aquesta consulta el MariaDB ens retorna amb un error com
+aquest:
+
+----
+ERROR 1235 (42000): This version of MariaDB doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
+----
+
+És a dir, no ens permet utilitzar la clàusula LIMIT en una subconsulta que
+estigui a l'operador IN (el problema no és només del MariaDB, el MySQL dóna
+el mateix resultat).
+
+Per resoldre aquesta situació podem utilitzar una nova subconsulta "buida":
+
+[source,sql]
+----
+SELECT id, first_name, last_name
+ FROM customers
+ WHERE id IN (
+   SELECT * FROM (
+      SELECT customer_id
+       FROM orders
+       GROUP BY customer_id
+       ORDER BY COUNT(*) DESC
+       LIMIT 5
+   ) AS t
+ )
+ ORDER BY id;
+----
+
+Embolcallant la subconsulta en una taula temporal hem aconseguit esquivar la
+limitació del SGBD i resoldre l'enunciat.
+====
+
+=== Els modificadors ANY i ALL
+
+La paraula clau *ANY* sempre apareix després d'un operador de comparació i
+significa que el resultat és TRUE si la comparació és certa per qualsevol dels
+valors retornats per la subconsulta.
+
+====
+A la base de dades Northwind, volem trobar els productes el preu dels quals
+(*list_price*) és menor que el preu de cost (*standard_cost*) d'algun dels
+productes de la categoria _Condiments_.
+
+[source,sql]
+----
+SELECT id, product_name, list_price
+ FROM products
+ WHERE list_price < ANY (
+   SELECT standard_cost
+    FROM products
+    WHERE category LIKE 'Condiments'
+ )
+ ORDER BY id;
+----
+
+Aquesta consulta comprova tots els preus dels productes de la categoria
+_Condiments_ i després cerca els productes pels quals hi ha almenys un dels
+preus trobats que és major o igual.
+
+La mateixa consulta s'hauria pogut resoldre amb:
+
+[source,sql]
+----
+SELECT id, product_name, list_price
+ FROM products
+ WHERE list_price < (
+   SELECT MAX(standard_cost)
+    FROM products
+    WHERE category LIKE 'Condiments'
+ )
+ ORDER BY id;
+----
+====
+
+Noteu que l'expressió *= ANY* és equivalent a *IN*.
+
+La clàusula *ALL* és similar a *ANY*, però el resultat és TRUE si la comparació
+és certa per _tots_ els valors retornats per la subconsulta.
+
+====
+Volem trobar els productes el preu de venta dels quals és menor que el preu de
+compra de tots els productes de la categoria _Condiments_.
+
+[source,sql]
+----
+SELECT id, product_name, list_price
+ FROM products
+ WHERE list_price < ALL (
+   SELECT standard_cost
+    FROM products
+    WHERE category LIKE 'Condiments'
+ )
+ ORDER BY id;
+----
+
+Com abans, la consulta també es pot escriure utilitzant una funció d'agregació:
+
+[source,sql]
+----
+SELECT id, product_name, list_price
+ FROM products
+ WHERE list_price < (
+   SELECT MIN(standard_cost)
+    FROM products
+    WHERE category LIKE 'Condiments'
+ )
+ ORDER BY id;
+----
+====
+
+=== Subconsultes amb EXISTS i NOT EXISTS
+
+La clàusula EXISTS retorna TRUE si la subconsulta que la segueix retorna
+almenys un resultat.
+
+====
+Cerca tots els clients als quals se'ls ha enviat alguna comanda a la ciutat de
+Chicago.
+
+A la següent consulta, la suconsulta retorna les comandes que ha rebut un client
+a Chicago. Si la subconsulta retorna algun resultat per l'_id_ d'un client,
+la sentència recupera les seves dades:
+
+[source,sql]
+----
+SELECT id, first_name, last_name
+ FROM customers c
+ WHERE EXISTS (
+    SELECT * FROM orders AS o
+    WHERE c.id = o.customer_id
+     AND ship_city LIKE 'Chicago'
+ )
+ ORDER BY id;
+----
+
+La mateixa consulta es pot resoldre utilitzant una subconsulta amb IN:
+
+[source,sql]
+----
+SELECT id, first_name, last_name
+ FROM customers c
+ WHERE id IN (
+    SELECT customer_id FROM orders AS o
+    WHERE ship_city LIKE 'Chicago'
+ )
+ ORDER BY id;
+----
+
+També es pot resoldre amb un JOIN:
+
+[source,sql]
+----
+SELECT DISTINCT c.id, first_name, last_name
+ FROM customers c
+ JOIN orders o ON c.id=o.customer_id
+ WHERE ship_city LIKE 'Chicago'
+ ORDER BY id;
+----
+====
+
+També es pot utilitzar NOT EXISTS. En aquest cas, es retorna TRUE si la
+suconsulta no retorna cap resultat.
+
+====
+Cerca tots els clients a qui mai s'ha enviat una comanda a la ciutat de
+Chicago.
+
+[source,sql]
+----
+SELECT id, first_name, last_name
+ FROM customers c
+ WHERE NOT EXISTS (
+    SELECT * FROM orders AS o
+    WHERE c.id = o.customer_id
+     AND ship_city LIKE 'Chicago'
+ )
+ ORDER BY id;
+----
+====
+
+=== Subconsultes a la clàusula SELECT
+
+Les subconsultes es poden utilitzar a diverses parts d'una consulta. A l'exemple
+anterior hem vist un dels casos més típics, l'ús d'una subconsulta en una
+clàusula WHERE, però també es poden utilitzar en un HAVING, a una SELECT, o fins
+i tot a FROM.
+
+En el següent exemple veurem una consulta que es pot resoldre utilitzant un
+JOIN o una subconsulta, amb resultats equivalents:
+
+====
+Utilitzant la base de dades Northwind, mostra una llista de tots els clients i
+la quantitat de comandes que ha fet cadascun d'ells.
+
+Podem resoldre aquesta consulta unint les taules _customers_ i _orders_,
+agrupant pels clients, i comptant les comandes de cadascun d'ells:
+
+[source,sql]
+----
+SELECT c.id, first_name, last_name, COUNT(o.id) AS NOrders
+ FROM customers c
+ LEFT JOIN orders o ON o.customer_id=c.id
+ GROUP BY c.id, first_name, last_name
+ ORDER BY c.id;
+----
+
+Com que el camp _NOrders_ és l'únic que estem agafant d'una altra taula, aquesta
+sentència es pot escriure fàcilment amb una subconsulta. La consulta principal
+retornarà les dades dels clients, mentre que la subconsulta comptarà les
+comandes de cadascun dels clients:
+
+[source,sql]
+----
+SELECT c.id, first_name, last_name, (
+    SELECT COUNT(*)
+     FROM orders
+     WHERE customer_id=c.id
+ ) AS NOrders
+ FROM customers c
+ ORDER BY c.id;
+----
+====
+
+En aquest exemple hem vist com s'utilitza una subconsulta a la clàusula
+SELECT, i com podem utilitzar camps definits a la consulta principal dins de
+la subconsulta (en aquest cas, _c.id_).
+
+Les subconsultes tenen fama de ser més lentes que els _JOIN_ en aquest tipus
+de consultes, però els experts recomanen comprovar el rendiment i el pla
+d'execució en cada cas particular, especialment si la quantitat de dades a
+consultar és gran.
+
+L'exemple anterior es torna més interessant si afegim una restricció a la cerca:
+
+====
+Mostra una llista de tots els clients i la quantitat de comandes que ha fet
+cadascun d'ells entre l'1 i el 15 d'abril de 2006.
+
+En aquest cas, la consulta amb un LEFT JOIN no funciona:
+
+[source,sql]
+----
+SELECT c.id, first_name, last_name, COUNT(o.id) AS NOrders
+ FROM customers c
+ LEFT JOIN orders o ON o.customer_id=c.id
+ WHERE o.order_date BETWEEN '2006-04-01' AND '2006-04-15'
+ GROUP BY c.id, first_name, last_name
+ ORDER BY c.id;
+----
+
+Aquesta consulta no retorna la llista completa de clients, només els que han fet
+alguna comanda entre l'1 i el 15 d'abril de 2006.
+
+El motiu d'això és que el filtre del WHERE s'aplica després del JOIN, amb la
+qual cosa, encara que el JOIN hagi mantingut totes les files de `customers`,
+el WHERE n'ha eliminat algunes després.
+
+Per mostrar tots els clients podem tornar a la solució basada en una
+subconsulta:
+
+[source,sql]
+----
+SELECT c.id, first_name, last_name, (
+   SELECT COUNT(*)
+    FROM orders
+    WHERE customer_id=c.id
+     AND order_date BETWEEN '2006-04-01' AND '2006-04-15'
+   ) AS NOrders
+ FROM customers c
+ ORDER BY c.id;
+----
+
+Donat que el filtre de l'ON d'un JOIN s'aplica abans que el JOIN, també podem
+reformular la primera opció d'aquesta manera:
+
+[source,sql]
+----
+SELECT c.id, first_name, last_name, COUNT(o.id) AS NOrders
+ FROM customers c
+ LEFT JOIN orders o ON o.customer_id=c.id
+   AND o.order_date BETWEEN '2006-04-01' AND '2006-04-15'
+ GROUP BY c.id, first_name, last_name
+ ORDER BY c.id;
+----
+====
+
+=== Subconsultes a la clàusula FROM
+
+En el següent exemple veurem un cas de subconsulta a la clàusula FROM:
+
+====
+A la base de dades Northwind, obté una llista de productes i el seu preu de
+venta més alt. El preu de venta d'un producte per a cada comanda es pot trobar
+a la columna *unit_price* de la taula *order_details*:
+
+[source,sql]
+----
+SELECT max_prices.product_id, p.product_name, max_prices.max_unit_price
+ FROM (
+    SELECT product_id, MAX(unit_price) AS max_unit_price
+     FROM order_details
+     GROUP BY product_id
+ ) AS max_prices
+ JOIN products AS p ON max_prices.product_id = p.id;
+----
+====
+
+En aquest cas, la subconsulta crea una taula temporal a memòria, i la consulta
+principal consulta aquesta taula. Cal utilitzar un àlies per donar nom a la
+taula temporal i així poder-la anomenar a la consulta principal.
+
+Noteu que en el cas de l'exemple la consulta es pot reescriure sense utilitzar
+una subconsulta:
+
+====
+[source,sql]
+----
+SELECT p.id, product_name, MAX(unit_price)
+ FROM products p
+ JOIN order_details od ON od.product_id = p.id
+ GROUP BY p.id, product_name;
+----
+====
+
+És important evitar les subconsultes a la clàusula FROM perquè
+tenen una pèrdua de rendiment important, així que només les utilitzarem quan
+la consulta no es pugui reescriure d'una altra forma.
+
+=== Subconsultes a la clàusula HAVING
+
+La clàusula HAVING també pot incloure subconsultes, de forma idèntica a com
+es fa a la clàusula WHERE.
+
+====
+Cerca els productes que s'han venut tant com el producte més venut.
+
+[source,sql]
+----
+SELECT p.id, product_code, product_name, COUNT(p.id) AS sells
+ FROM products p
+ LEFT JOIN order_details od ON p.id=od.product_id
+ GROUP BY p.id, product_code, product_name
+ HAVING sells >= ALL (
+   SELECT COUNT(product_id)
+    FROM order_details
+    GROUP BY product_id
+ );
+----
+====
+
+=== Operacions de conjunts: UNION, INTERSECT, EXCEPT
+
+A més de les subconsultes, també podem ajuntar el resultat de diverses consultes
+utilitzant operacions de conjunts sobre el resultats.
+
+Per exemple, l'operació d'unió (_UNION_) uneix els resultats de dues consultes.
+Per fer la unió cal que les dues consultes retornin la mateixa quantitat de
+columnes, del mateix tipus.
+
+El següent exemple sobre la base de dades Northwind uneix el nom i cognom
+d'empleats i clients en un sol conjunt de resultats:
+
+[source,sql]
+----
+(SELECT first_name, last_name, 'Employee' AS relation FROM employees)
+UNION
+(SELECT first_name, last_name, 'Customer' FROM customers)
+ORDER BY last_name, first_name;
++---------------+------------------+----------+
+| first_name    | last_name        | relation |
++---------------+------------------+----------+
+| Elizabeth     | Andersen         | Customer |
+| Catherine     | Autier Miconi    | Customer |
+| Thomas        | Axen             | Customer |
+| Jean Philippe | Bagel            | Customer |
+...
+| Karen         | Toh              | Customer |
+| Roland        | Wacker           | Customer |
+| Ming-Yang     | Xie              | Customer |
+| Robert        | Zare             | Employee |
++---------------+------------------+----------+
+38 rows in set (0.00 sec)
+----
+
+Per defecte, _UNION_ elimina les files duplicades. Es pot utilitzar _UNION ALL_
+per evitar-ho.
+
+L'operador _INTERSECT_ selecciona només les files que apareixen a les dues
+consultes que relacionem.
+
+[WARNING]
+====
+_INTERSECT_ no està implementat en MySQL. A MariaDB està implementat a partir
+de la versió 10.3.0.
+====
+
+La següent consulta ens retornaria els empleats que, a més, són clients de
+l'empresa (suposem que dues persones que es diuen igual i tenen el mateix
+correu electrònic són la mateixa persona):
+
+[source,sql]
+----
+(SELECT first_name, last_name, email_address FROM employees)
+INTERSECT
+(SELECT first_name, last_name, email_address FROM customers)
+ORDER BY last_name, first_name;
+----
+
+Finalment, _EXCEPT_ retorna les files resultants de la primera consulta que
+no siguin resultats de la segona consulta.
+
+[WARNING]
+====
+_EXCEPT_ no està implementat en MySQL. A MariaDB està implementat a partir
+de la versió 10.3.0.
+====
+
+La següent consulta mostra tots els empleats que no són clients de l'empresa:
+
+[source,sql]
+----
+(SELECT first_name, last_name, email_address FROM employees)
+EXCEPT
+(SELECT first_name, last_name, email_address FROM customers)
+ORDER BY last_name, first_name;
+----
+
+== Modificació de dades: sentències INSERT, UPDATE i DELETE
+
+=== Sentència INSERT
+
+La _sentència INSERT_ afegeix files a una taula.
+
+La sintaxi per la sentència INSERT és:
+
+[source,sql]
+----
+INSERT [INTO] nom_taula | nom_vista [llista_columnes]
+ DEFAULT VALUES | llista_valors | sentència SELECT
+----
+
+La sentència INSERT té les següents propietats:
+
+* l'INSERT especifica la taula o vista on s'inseriran les dades.
+* *llista_columnes* llista les columnes que es veuran afectades per l'INSERT.
+* Si s'omet la llista de columnes, s'han de proporcionar tots els valors.
+* Si s'inclou la llista de columnes, es poden llistar en qualsevol ordre.
+* *llista_valors* especifica les dades que es volen inserir a la taula, i sempre
+cal posar-los.
+* Les columnes autonumèriques no s'haurien de llistar explícitament a la
+*llista_columnes* o a la *llista_valors*.
+
+Si una sentència INSERT viola una restricció o intenta inserir un valor d'un
+tipus invàlid, la sentència falla i el SGBD retorna un missatge d'error.
+
+Si no s'especifiquen totes les columnes a *llista_columnes*, les altres columnes
+agafaran el valor per defecte, si el tenen definit explícitament o el seu tipus
+de dades admet un valor per defecte implícit, s'agafarà el següent nombre
+disponible, si és un camp autonumèric, o es produïrà un error i la inserció de
+la fila es rebutjarà.
+
+Aquest exemple utilitza INSERT per afegir un registre a la taula d'autors:
+
+[source,sql]
+----
+INSERT INTO Authors
+ VALUES('555-093-467', 'Martin', 'April', '281 555-5673', '816 Market St.',
+ 'Vancouver', 'BC', 'V7G3P4', 0)
+----
+
+El següent exemple il·lustra com inserir una fila especificant només dades
+parcials a la taula _Publishers_. La columna _Country_ té un valor per defecte
+de 'Canada', i per tant no es requereix que s'inclogui en els valors:
+
+[source,sql]
+----
+INSERT INTO Publishers (ID, Name, City, Province)
+ VALUES ('9900', 'Acme Publishing', 'Vancouver', 'BC')
+----
+
+Per inserir files en una taula amb una columna autonumèrica, només cal tenir en
+compte que el següent número disponible és el seu valor per defecte. Així, si
+no l'incloem a la llista de columnes, agafarà el següent número disponible,
+però si volem especificar-li un valor concret també ho podem fer.
+
+==== Inserir files amb una sentència SELECT
+
+De vegades podem crear una petita taula temporal a partir d'una o més taules
+existents. Per fer això, podem inserir files amb una sentència SELECT.
+
+El següent exemple crea una taula _Publishers_ temporal utilitzant la
+sentència CREATE TABLE. Després s'utilitza la sentència INSERT amb un SELECT
+per afegir registres a aquesta taula _Publishers_ temporal.
+
+[source,sql]
+----
+CREATE TABLE tmpPublishers (
+ ID char(4) NOT NULL,
+ Name varchar(40) NULL,
+ City varchar(20) NULL,
+ Province char(2) NULL,
+ Country varchar(30) NULL DEFAULT('Canada')
+)
+
+INSERT tmpPublishers
+ SELECT * FROM Publishers
+----
+
+En aquest altre exemple, copiem només un subconjunt de les dades:
+
+[source,sql]
+----
+INSERT tmpPublishers(ID, Name)
+ SELECT ID, Name
+ FROM Publishers
+----
+
+En aquest exemple, les dades de les editorials es copien a la taula
+_tmpPublishers_ i a la columna _Country_ s'hi assigna 'Canada'.
+
+[source,sql]
+----
+INSERT tmpPublishers(ID, Name, City, Province, Country)
+ SELECT ID, Name, City, Province, 'Canada'
+ FROM Publishers
+----
+
+==== INSERT amb claus autogenerades
+
+Imaginem les dues taules següents:
+
+[source,sql]
+----
+CREATE TABLE SolarSystems(
+  Id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  Code            VARCHAR(10) NOT NULL UNIQUE,
+  Name            VARCHAR(100) NOT NULL
+) ENGINE=INNODB DEFAULT CHARSET=UTF8 COLLATE=UTF8_SPANISH_CI;
+----
+
+[source,sql]
+----
+CREATE TABLE Planets (
+  Id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  Code            VARCHAR(10) NOT NULL UNIQUE,
+  Name            VARCHAR(100) NOT NULL,
+  Position        INT UNSIGNED NOT NULL,
+  SystemId        INT UNSIGNED NOT NULL,
+  AverageDistance FLOAT UNSIGNED NOT NULL,
+  CONSTRAINT UNIQUE (SystemId, Position),
+  CONSTRAINT FOREIGN KEY (SystemId) REFERENCES SolarSystems(Id)
+) ENGINE=INNODB DEFAULT CHARSET=UTF8 COLLATE=UTF8_SPANISH_CI;
+----
+
+Encara no hem estudiat la sentència `CREATE TABLE`, però en podem entendre
+algunes coses:
+
+- La taula `SolarSystems` té com a clau primària el camp anomenat `Id`.
+- Aquest cap és `AUTO_INCREMENT`. Això significa que no caldrà que especifiquem
+aquest Id quan fem un INSERT, sinó que el sistema ja triarà el següent Id
+disponible.
+
+En aquests casos, podem utilitzar la funció `LAST_INSERT_ID()` per obtenir
+l'últim Id autogenerat.
+
+Així, si volem afegir un sistema i un planeta a les taules anteriors, ho
+podem fer de la següent manera:
+
+[source,sql]
+----
+INSERT INTO SolarSystems(Code, Name) VALUES ('FZ83RQ', 'Zoplois');
+INSERT INTO Planets(Code, Name, Position, SystemId, AverageDistance)
+  VALUES ('FZ83RQ01', 'Strorix L3JM', 1, LAST_INSERT_ID(), 1.39);
+----
+
+==== INSERT sense claus autogenerades
+
+Agafem ara les mateixes taules que a l'exemple anterior, però eliminem
+l'AUTO_INCREMENT:
+
+[source,sql]
+----
+CREATE TABLE SolarSystems(
+  Id              INT UNSIGNED PRIMARY KEY,
+  Code            VARCHAR(10) NOT NULL UNIQUE,
+  Name            VARCHAR(100) NOT NULL
+) ENGINE=INNODB DEFAULT CHARSET=UTF8 COLLATE=UTF8_SPANISH_CI;
+----
+
+[source,sql]
+----
+CREATE TABLE Planets (
+  Id              INT UNSIGNED PRIMARY KEY,
+  Code            VARCHAR(10) NOT NULL UNIQUE,
+  Name            VARCHAR(100) NOT NULL,
+  Position        INT UNSIGNED NOT NULL,
+  SystemId        INT UNSIGNED NOT NULL,
+  AverageDistance FLOAT UNSIGNED NOT NULL,
+  CONSTRAINT UNIQUE (SystemId, Position),
+  CONSTRAINT FOREIGN KEY (SystemId) REFERENCES SolarSystems(Id)
+) ENGINE=INNODB DEFAULT CHARSET=UTF8 COLLATE=UTF8_SPANISH_CI;
+----
+
+Ara, hem d'especificar l'Id quan fem l'INSERT perquè el sistema no el genera
+per nosaltres. La idea seria agafar el següent Id disponible, és a dir, l'Id
+més gran que hi hagi fins ara, i sumar-li 1.
+
+Podríem provar:
+
+[source,sql]
+----
+INSERT INTO SolarSystems(Id, Code, Name) VALUES (
+  (SELECT MAX(Id)+1 FROM SolarSystems), 'FZ83RQ', 'Zoplois');
+----
+
+Això però ens donarà el següent error:
+
+[source]
+----
+ERROR 1093 (HY000): Table 'SolarSystems' is specified twice, both as a target
+for 'INSERT' and as a separate source for data
+----
+
+Al MariaDB no li agrada modificar la mateixa taula que està consultant perquè
+això podria generar algun problema de concurrència.
+
+El que podem fer és calcular l'Id i guardar el valor en una variable. El
+MySQL/MariaDB permet l'ús de variables. Podem guardar el resultat d'una SELECT
+en una variable utilitzant INTO i especificant el nom de la variable. El nom
+d'una variable sempre comença per @:
+
+[source,sql]
+----
+SELECT MAX(Id)+1 INTO @next_system_id FROM SolarSystems;
+INSERT INTO SolarSystems(Id, Code, Name) VALUES (@next_system_id, 'FZ83RQ', 'Zoplois');
+SELECT MAX(Id)+1 INTO @next_planet_id FROM Planets;
+INSERT INTO Planets(Id, Code, Name, Position, SystemId, AverageDistance)
+  VALUES (@next_planet_id, 'FZ83RQ01', 'Strorix L3JM', 1, @next_system_id, 1.39);
+----
+
+[WARNING]
+====
+Cal tenir en compte que alguna d'aquestes INSERT podria fallar si algú està
+modificant la base de dades al mateix temps que nosaltres, fent servir una
+altra connexió.
+====
+
+=== Sentència UPDATE
+
+La _sentència UPDATE_ permet modificar les dades a files existents.
+
+Aquest exemple utilitza la sentència UPDATE per estandaritzar el camp del país
+per tal que sigui Canadà per a tots els registres de la taula _Publishers_:
+
+[source,sql]
+----
+UPDATE Publishers
+ SET Country = 'Canada'
+----
+
+Aquest exemple incrementa la quantia dels cànons en un 10%, per aquells cànons
+que estan entre 10 i 20.
+
+[source,sql]
+----
+UPDATE RoySched
+ SET Royalty = Royalty + (Royalty * .10)
+ WHERE Royalty BETWEEN 10 and 20
+----
+
+==== Inclusió de subconsultes en una sentència UPDATE
+
+Es vol promocionar als empleats de la taula _Employees_ que va contractar
+l'editorial el 2010. Se'l vol assignar el nivell més alt que hi hagi pel seu
+tipus de feina. Aquest és l'aspecta que tindria la sentència UPDATE.
+
+[source,sql]
+----
+UPDATE Employees
+ SET JobLevel = (
+   SELECT MaxLevel
+    FROM Jobs
+    WHERE Employees.JobId = Jobs.Id
+ )
+ WHERE YEAR(Employees.HireDate) = 2010
+----
+
+=== Sentència DELETE
+
+La _sentència DELETE_ elimina files d'un conjunt de registres. Amb DELETE hem
+d'especificar la taula o vista que conté les files que volem esborrar, i només
+podem llistar una taula o vista cada cop. Va seguida d'una clàusula WHERE que és
+una clàusula WHERE estàndar que limita l'eliminació a les files seleccionades.
+
+La sintaxi de DELETE té aquesta forma:
+
+[source,sql]
+----
+DELETE FROM {table_name | view_name }
+ [WHERE clause]
+----
+
+Les regles per a la sentència DELETE són:
+
+1. Si s'omet la clàusula WHERE, s'eliminaran totes les files de la taula (però
+no els índexos, la pròpia taula, i les seves restriccions). **No t'oblidis del
+WHERE quan facis un DELETE FROM!**
+
+2. No es pot utilitzar DELETE amb una vista que té una clàusula FROM que
+anomeni més d'un taula (perquè DELETE només pot afectar una taula cada cop).
+
+A continuació es mostren tres possibles sentències DELETE:
+
+- Esborrar totes les files d'una taula:
+
+[source,sql]
+----
+DELETE
+ FROM Discounts;
+----
+
+- Esborrar files seleccionades:
+
+[source,sql]
+----
+DELETE
+ FROM Sales
+ WHERE StoreId = '6380';
+----
+
+- Esborrar files basant-se en el valor d'una subconsulta:
+
+[source,sql]
+----
+DELETE FROM Sales
+ WHERE TitleId IN (
+   SELECT TitleId
+   FROM Books
+   WHERE type LIKE 'mod_cook'
+ );
+----
+
+== Termes claus
+
+*funció d'agregació*: retorna un valor resum.
+
+*ASC*: ordre ascendent.
+
+*funció de conversió*: transforma una dada d'un tipus en un altre tipus.
+
+*cross join*: unió de dues taules que retorna totes les combinacions possibles
+entre elements d'una i de l'altra.
+
+*funció de dates*: tracta informació sobre dates i temps.
+
+*sentència DELETE*: esborra files d'un conjunt de registres.
+
+*DESC*: ordre descendent.
+
+*GROUP BY*: s'utilitza per crear una fila de sortida per cada grup i produeix
+valors de resum per les columnes seleccionades.
+
+*inner join*: connecta dues taules per una columna del mateix tipus de dades.
+
+*sentència INSERT*: afegeix files a una taula.
+
+*left outer join*: unió de dues taules en què es retornen totes les files de
+l'esquerra.
+
+*funció matemàtica*: realitza operacions sobre dades numèriques.
+
+*right outer join*: unió de dues taules en què es retornen totes les files de
+la dreta.
+
+*sentència SELECT*: s'utilitza per fer consultes a una base de dades.
+
+*funció de cadenes*: realitza operacions en cadenes de caràcters, dades
+binàries o expressions.
+
+*sentència UPDATE*: canvia les dades de files existents.
+
+*comodí*: permet a l'usuari l'especificació de patrons que coincideixin amb
+diverses combinacions de lletres.

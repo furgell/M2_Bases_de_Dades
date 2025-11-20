@@ -1,0 +1,83 @@
+= Activitat: Tipus de dades de MySQL/MariaDB
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+<<<
+
+Fes les activitats següents i penja un arxiu amb els enunciats i les respostes.
+És recomanable que facis un breu esquema dels tipus de dades amb els que pots
+treballar en MariaDB i després responguis les preguntes següents.
+
+La principal font de documentació és l'apartat
+link:https://mariadb.com/kb/en/library/data-types/[Data Types in MariaDB] de la
+documentació de MariaDB.
+
+== Tipus per cadenes de text
+
+1. De quins tipus de dades disposa el MariaDB per emmagatzemar cadenes de text?
+
+2. Quina diferència hi ha entre el tipus de dada `CHAR` i el `VARCHAR`?
+
+3. Quina diferència hi ha entre el tipus de dada `CHAR` i el `BINARY`?
+
+4. Què vol dir el `CHARSET` (`CHARACTER SET`) i la `COLLATION`?
+
+5. Quina diferència hi ha entre el tipus de dada `VARCHAR` i `NVARCHAR`
+(`NATIONAL VARCHAR`)?
+
+6. Quina és la longitud màxima d'una dada emmagatzemada en un camp `CHAR`? I en
+un `VARCHAR`?
+
+7. Què fa el MariaDB si s'intenta guardar en un `VARCHAR(20)` una cadena de 25
+posicions?
+
+8. Què fa el MariaDB si s'intenta guardar en un camp `CHAR(30)` una cadena de 25
+posicions?
+
+9. Què fa el MariaDB si s'intenta guardar en un camp `VARCHAR(30)` una cadena de
+25 posicions?
+
+10. Quins factors s'han de tenir en compte per triar entre el tipus de dada
+`CHAR` i el `VARCHAR`?
+
+11. Posa exemples de 3 atributs en què sigui convenient fer servir el tipus de
+dada `VARCHAR`.
+
+== Tipus de dades per a dates i temps
+
+1. De quins tipus de dades disposa el MariaDB per emmagatzemar dates i temps?
+
+2. Per a quins tipus de valors és adequat cadascun d'ells?
+
+3. Quina diferència hi ha entre el tipus `DATETIME` i `TIMESTAMP`?
+
+4. Es poden fer operacions amb dates en MariaDB? Quines?
+
+== Tipus de dades numèriques
+
+1. De quins tipus de dades disposa el MariaDB per emmagatzemar valors numèrics?
+
+2. Quins tipus de nombres es poden emmagatzemar amb el tipus `DECIMAL` o
+`NUMERIC`?
+
+3. Per a què serveixen la precisió i l'escala dels `DECIMAL`?
+
+4. Què fa el MariaDB si s'intenta emmagatzemar el valor 12.345 en un camp de
+tipus `DECIMAL(5,2)`?
+
+5. Què fa el MySQL si s'intenta emmagatzemar el valor 12.34 en un camp de tipus
+`NUMERIC(3,2)`?
+
+6. Quina diferència hi ha entre el tipus `FLOAT` i el tipus `DECIMAL`?
+
+7. Quina escala fa servir el MariaDB si no s'especifica més que la precisió en
+un `DECIMAL`?
+
+8. Com especifiquem que una dada guardarà només nombres positius?
+
+9. Què és un `ENUM`? Dóna un exemple de possible ús d'un `ENUM`.

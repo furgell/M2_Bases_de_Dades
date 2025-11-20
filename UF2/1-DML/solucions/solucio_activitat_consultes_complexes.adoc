@@ -1,0 +1,414 @@
+= Activitat: Consultes complexes
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+== Solucions
+
+=== Consultes
+
+1. Cerca quants àlbums hi ha de _Deep Purple_.
++
+[source,sql]
+----
+SELECT COUNT(*)
+ FROM Album
+ JOIN Artist ON Album.ArtistId = Artist.ArtistId
+ WHERE Artist.Name LIKE 'Deep Purple';
+----
+
+2. Mostra el nom i cognoms dels empleats que estan assignats com a suport
+d'algun client (`SupportRepId`).
++
+[source,sql]
+----
+SELECT DISTINCT Employee.Firstname, Employee.Lastname
+ FROM Employee
+ JOIN Customer ON Employee.EmployeeId = Customer.SupportRepId;
+----
++
+[source,sql]
+----
+SELECT Employee.Firstname, Employee.Lastname
+ FROM Employee
+ JOIN Customer ON Employee.EmployeeId = Customer.SupportRepId
+ GROUP BY Employee.EmployeeId;
+----
+
+3. Mostra el nom i cognoms de *_tots_* els empleats i la quantitat de clients
+a qui estan assignats per donar suport.
++
+[source,sql]
+----
+SELECT Employee.Firstname, Employee.LastName, COUNT(Customer.SupportRepId) AS NSupportCustomers
+ FROM Employee
+ LEFT JOIN Customer ON Employee.EmployeeId = Customer.SupportRepId
+ GROUP BY Employee.EmployeeId, Employee.Firstname, Employee.LastName;
+----
+
+4. Troba el nom de totes les cançons de l'àlbum _Back to Black_ i el nom de
+l'artista que l'ha fet (sortirà repetit per cada tema).
++
+[source,sql]
+----
+SELECT Track.Name, Artist.Name
+ FROM Track
+ JOIN Album ON Track.AlbumId = Album.AlbumId
+ JOIN Artist ON Album.ArtistId = Artist.ArtistId
+ WHERE Album.Title LIKE 'Back to Black';
+----
+
+5. Troba els beneficis que hem obtingut amb el gènere _Blues_. Mostra'n
+l'identificador, el nom, i els beneficis.
++
+[source,sql]
+----
+SELECT Genre.GenreId, Genre.Name, SUM(InvoiceLine.UnitPrice*InvoiceLine.Quantity) AS Profits
+ FROM InvoiceLine
+ JOIN Track ON InvoiceLine.TrackId = Track.TrackId
+ JOIN Genre ON Track.GenreId = Genre.GenreId
+ WHERE Genre.Name LIKE 'Blues'
+ GROUP BY Genre.GenreId, Genre.Name;
+----
+
+6. Troba els diners que hem fet per cadascun dels gèneres musicals. Mostra'n
+l'identificador, el nom, i els beneficis obtinguts dels gèneres pels quals n'hem
+obtingut algun benefici. Ordena els resultats de més a menys beneficis.
++
+[source,sql]
+----
+SELECT Genre.GenreId, Genre.Name, SUM(InvoiceLine.UnitPrice*InvoiceLine.Quantity) AS Profits
+ FROM InvoiceLine
+ JOIN Track ON InvoiceLine.TrackId = Track.TrackId
+ JOIN Genre ON Track.GenreId = Genre.GenreId
+ GROUP BY Genre.GenreId, Genre.Name
+ ORDER BY Profits DESC, Genre.Name;
+----
+
+7. Troba els beneficis que hem obtingut per cadascun dels gèneres musicals.
+Mostra'n l'identificador, el nom, i els beneficis. Volem una llista amb
+*_tots_* els gèneres, encara que no s'hagi venut cap cançó
+d'un gènere determinat. Ordena els resultats de més a menys beneficis, i en cas
+d'empat pel nom del gènere.
++
+[source,sql]
+----
+SELECT Genre.GenreId, Genre.Name, SUM(InvoiceLine.UnitPrice*InvoiceLine.Quantity) AS Profits
+ FROM InvoiceLine
+ RIGHT JOIN Track ON InvoiceLine.TrackId = Track.TrackId
+ RIGHT JOIN Genre ON Track.GenreId = Genre.GenreId
+ GROUP BY Genre.GenreId, Genre.Name
+ ORDER BY Profits DESC, Genre.Name;
+----
++
+[source,sql]
+----
+SELECT Genre.GenreId, Genre.Name, SUM(InvoiceLine.UnitPrice*InvoiceLine.Quantity) AS Profits
+ FROM Genre
+ LEFT JOIN Track ON Track.GenreId = Genre.GenreId
+ LEFT JOIN InvoiceLine ON InvoiceLine.TrackId = Track.TrackId
+ GROUP BY Genre.GenreId, Genre.Name
+ ORDER BY Profits DESC, Genre.Name;
+----
+
+8. Troba els beneficis que hem obtingut amb els gèneres pels quals n'hem obtingut
+més de 100 dòlars. Mostra'n l'identificador, el nom, i els beneficis. Ordena
+els resultats pels beneficis obtinguts, de més a menys.
++
+[source,sql]
+----
+SELECT Genre.GenreId, Genre.Name, SUM(InvoiceLine.UnitPrice*InvoiceLine.Quantity) AS Profits
+ FROM InvoiceLine
+ JOIN Track ON InvoiceLine.TrackId = Track.TrackId
+ JOIN Genre ON Track.GenreId = Genre.GenreId
+ GROUP BY Genre.GenreId, Genre.Name
+ HAVING Profits > 100
+ ORDER BY Profits DESC;
+----
+
+9. Troba el nom de tots els artistes que es diuen igual que alguna de les
+cançons.
++
+[source,sql]
+----
+SELECT DISTINCT Artist.Name
+ FROM Artist
+ JOIN Track ON Artist.Name LIKE Track.Name;
+----
+
+10. Volem una llista del nom i cognoms de *_tots_* els clients i de quantes
+comandes ha fet cadascun.
++
+[source,sql]
+----
+SELECT Customer.FirstName, Customer.LastName, COUNT(Invoice.InvoiceId) AS NInvoices
+ FROM Customer
+ LEFT JOIN Invoice ON Customer.CustomerId = Invoice.CustomerId
+ GROUP BY Customer.CustomerId, Customer.FirstName, Customer.LastName;
+----
+
+11. Obté una llista de *_tots_* els gèneres de la base de dades (identificador
+i nom) i de quantes cançons hi ha de cada gènere.
++
+[source,sql]
+----
+SELECT Genre.GenreId, Genre.Name, COUNT(Track.TrackId)
+ FROM Genre
+ LEFT JOIN Track ON Genre.GenreId = Track.GenreId
+ GROUP BY Genre.GenreId, Genre.Name;
+----
+
+12. Cerca el nom dels tres grups dels quals hi ha més àlbums. Mostra'n el nom
+i la quantitat d'àlbums de cadascun.
++
+[source,sql]
+----
+SELECT Artist.Name, COUNT(*) AS NAlbums
+ FROM Album
+ JOIN Artist ON Album.ArtistId = Artist.ArtistId
+ GROUP BY Artist.ArtistId, Artist.Name
+ ORDER BY NAlbums DESC
+ LIMIT 3;
+----
+
+13. Cerca el nom dels grups dels quals hi ha més de 8 àlbums. Mostra'n el nom
+i la quantitat d'àlbums de cadascun. Ordena els resultats de més a menys àlbums,
+i en cas d'empat pel nom del grup.
++
+[source,sql]
+----
+SELECT Artist.Name, COUNT(*) AS NAlbums
+ FROM Album
+ JOIN Artist ON Album.ArtistId = Artist.ArtistId
+ GROUP BY Artist.ArtistId, Artist.Name
+ HAVING NAlbums > 8
+ ORDER BY NAlbums DESC, Artist.Name;
+----
+
+14. Cerca els 5 àlbums que tenen una durada mitjana de les seves pistes més gran.
+De cada àlbum en volem el seu nom, el nom del grup, i la durada mitjana de les
+seves pistes.
++
+[source,sql]
+----
+SELECT Album.Title, Artist.Name, AVG(Track.Milliseconds) AS TrackDuration
+ FROM Album
+ JOIN Artist ON Album.ArtistId = Artist.ArtistId
+ JOIN Track ON Album.AlbumId = Track.AlbumId
+ GROUP BY Track.AlbumId, Album.Title, Artist.Name
+ ORDER BY TrackDuration DESC
+ LIMIT 5;
+----
+
+15. Cerca el nom dels tres gèneres dels quals en tenim més pistes, i la
+quantitat de pistes de cadascun d'ells.
++
+[source,sql]
+----
+SELECT Genre.Name, COUNT(*) AS NTracks
+ FROM Genre
+ JOIN Track ON Genre.GenreId = Track.GenreId
+ GROUP BY Genre.GenreId, Genre.Name
+ ORDER BY NTracks DESC
+ LIMIT 3;
+----
+
+16. Obté l'identificador, el nom, i la quantitat de cançons de les llistes
+(`Playlist`) que contenen més de mil cançons. Ordena els resultats de més a
+menys cançons, i en cas d'empat, per l'identificador de la llista.
++
+[source,sql]
+----
+SELECT Playlist.PlaylistId, Playlist.Name, COUNT(*) AS NTracks
+ FROM Playlist
+ JOIN PlaylistTrack ON Playlist.PlaylistId = PlaylistTrack.PlaylistId
+ GROUP BY Playlist.PlaylistId, Playlist.Name
+ HAVING NTracks > 1000
+ ORDER BY NTracks DESC, Playlist.PlaylistId;
+----
+
+17. Cerca els noms de les cançons i els beneficis que ens han reportat
+d'aquelles cançons el benefici de les quals sigui de més de 2 dòlars. Ordena
+els resultats pels beneficis, de més a menys, i en cas d'empat, pel nom de la
+cançó.
++
+[source,sql]
+----
+SELECT Track.Name, SUM(InvoiceLine.Quantity*InvoiceLine.UnitPrice) AS Profits
+ FROM Track
+ JOIN InvoiceLine ON Track.TrackId = InvoiceLine.TrackId
+ GROUP BY Track.TrackId, Track.Name
+ HAVING Profits > 2
+ ORDER BY Profits DESC, Track.Name;
+----
+
+18. Troba el nom de totes les cançons, el nom de l'àlbum, i el nom de l'artista,
+que s'han comprat a la factura 225.
++
+[source,sql]
+----
+SELECT Track.Name, Album.Title, Artist.Name
+ FROM Track
+ JOIN Album ON Track.AlbumId = Album.AlbumId
+ JOIN Artist ON Album.ArtistId = Artist.ArtistId
+ JOIN InvoiceLine ON Track.TrackId = InvoiceLine.TrackId
+ WHERE InvoiceLine.InvoiceId = 225;
+----
+
+19. Volem una llista de l'identificador i els noms de les cançons, del nom
+de l'àlbum al qual pertanyen, i del nombre de llistes de reproducció on
+apareixen, de totes les cançons que apareixen a més de quatre llistes de
+reproducció.
++
+[source,sql]
+----
+SELECT Track.TrackId, Track.Name, Album.Title, COUNT(*) AS NPlaylists
+ FROM Track
+ JOIN Album ON Track.AlbumId = Album.AlbumId
+ JOIN PlaylistTrack ON Track.TrackId = PlaylistTrack.TrackId
+ GROUP BY Track.TrackId, Track.Name, Album.Title
+ HAVING NPlaylists > 4;
+----
+
+20. Mostra la llista de reproducció anomenada _Grunge_. Volem veure una llista
+amb tots els títols de les cançons, la seva durada en segons
+i el nom de l'artista.
++
+[source,sql]
+----
+SELECT Track.Name, Track.Milliseconds/1000 AS Duration, Artist.Name
+ FROM Track
+ JOIN Album ON Track.AlbumId = Album.AlbumId
+ JOIN Artist ON Album.ArtistId = Artist.ArtistId
+ JOIN PlaylistTrack ON Track.TrackId = PlaylistTrack.TrackId
+ JOIN Playlist ON PlaylistTrack.PlaylistId = Playlist.PlaylistId
+ WHERE Playlist.Name LIKE 'Grunge';
+----
+
+21. Mostra el nom dels artistes i la quantitat de cançons del gènere _World_
+que han creat, pels artistes que n'han creat més de 5.
++
+[source,sql]
+----
+SELECT Artist.Name, COUNT(*) AS NTracks
+ FROM Artist
+ JOIN Album ON Artist.ArtistId = Album.ArtistId
+ JOIN Track ON Album.AlbumId = Track.AlbumId
+ JOIN Genre ON Track.GenreId = Genre.GenreId
+ WHERE Genre.Name LIKE 'World'
+ GROUP BY Artist.ArtistId, Artist.Name
+ HAVING NTracks > 5;
+----
+
+22. Troba el nom de les cançons que ha comprat el client Enrique Muñoz, i la
+data en què s'ha comprat cadascuna de les cançons.
++
+[source,sql]
+----
+SELECT Track.Name, Invoice.InvoiceDate
+ FROM Track
+ JOIN InvoiceLine ON Track.TrackId = InvoiceLine.TrackId
+ JOIN Invoice ON InvoiceLine.InvoiceId = Invoice.InvoiceId
+ JOIN Customer ON Invoice.CustomerId = Customer.CustomerId
+ WHERE Customer.FirstName LIKE 'Enrique'
+  AND Customer.LastName LIKE 'Muñoz';
+----
+
+23. Troba l'artista preferit de l'Enrique Muñoz (l'artista del qual ha comprat
+més cançons), i quantes cançons n'ha comprat.
++
+[source,sql]
+----
+SELECT Artist.Name, COUNT(*) AS NTracks
+ FROM Artist
+ JOIN Album ON Artist.ArtistId = Album.ArtistId
+ JOIN Track ON Album.AlbumId = Track.AlbumId
+ JOIN InvoiceLine ON Track.TrackId = InvoiceLine.TrackId
+ JOIN Invoice ON InvoiceLine.InvoiceId = Invoice.InvoiceId
+ JOIN Customer ON Invoice.CustomerId = Customer.CustomerId
+ WHERE Customer.FirstName LIKE 'Enrique'
+  AND Customer.LastName LIKE 'Muñoz'
+ GROUP BY Artist.ArtistId, Artist.Name
+ ORDER BY NTracks DESC
+ LIMIT 1;
+----
+
+24. Obté una llista del nom i cognom de *_tots_* els empleats juntament amb el
+nom i cognom de l'empleat de qui depenen (`ReportsTo`).
++
+[source,sql]
+----
+SELECT e1.FirstName AS EmployeeFirstName, e1.LastName AS EmployeeLastName,
+  e2.FirstName AS ReportsToFirstName, e2.LastName AS ReportsToLastName
+ FROM Employee e1
+ LEFT JOIN Employee e2 ON e1.ReportsTo = e2.EmployeeId;
+----
+
+25. Volem la mateixa llista que a l'exercici anterior, però al revés: per a
+cada empleat, volem veure quins empleats depenen d'ell. Com abans, volem una
+llista amb tots els empleats.
++
+[source,sql]
+----
+SELECT e1.FirstName AS EmployeeFirstName, e1.LastName AS EmployeeLastName,
+  e2.FirstName AS DependantFirstName, e2.LastName AS DependantLastName
+ FROM Employee e1
+ LEFT JOIN Employee e2 ON e1.EmployeeId = e2.ReportsTo;
+----
+
+26. Volem la mateixa llista d'empleats que a l'exercici anterior, però només
+el nom i cognoms de cada empleat i la quantitat d'empleats que depenen d'ell.
++
+[source,sql]
+----
+SELECT e1.FirstName, e1.LastName, COUNT(e2.EmployeeId) AS NDependants
+ FROM Employee e1
+ LEFT JOIN Employee e2 ON e1.EmployeeId = e2.ReportsTo
+ GROUP BY e1.EmployeeId, e1.FirstName, e1.LastName;
+----
+
+27. Troba el nom dels artistes que coincideix amb el nom d'alguna cançó d'un
+altre artista. Volem veure el nom dels dos artistes relacionats.
++
+[source,sql]
+----
+SELECT a1.Name AS OtherArtist, a2.Name AS ArtistNameLikeTrackName
+ FROM Artist a1
+ JOIN Album ON a1.ArtistId = Album.ArtistId
+ JOIN Track ON Album.AlbumId = Track.AlbumId
+ JOIN Artist a2 ON a2.Name LIKE Track.Name
+ WHERE a1.Name NOT LIKE a2.Name;
+----
+
+28. Troba el nom dels artistes que coincideix amb part del nom d'alguna cançó
+d'un altre artista. Volem veure el nom dels dos artistes relacionats i el títol
+de la cançó.
++
+[TIP]
+====
+Utilitza la funció CONCAT per concatenar diverses cadenes de text.
+====
++
+[source,sql]
+----
+SELECT DISTINCT a1.Name AS OtherArtist, a2.Name AS ArtistNameLikeTrackName, Track.Name AS TrackName
+ FROM Artist a1
+ JOIN Album ON a1.ArtistId = Album.ArtistId
+ JOIN Track ON Album.AlbumId = Track.AlbumId
+ JOIN Artist a2 ON Track.Name LIKE CONCAT('%',a2.Name,'%')
+ WHERE a1.Name NOT LIKE a2.Name;
+----
++
+[source,sql]
+----
+SELECT DISTINCT a1.Name AS OtherArtist, a2.Name AS ArtistNameLikeTrackName, Track.Name AS TrackName
+ FROM Artist a1
+ JOIN Album ON a1.ArtistId = Album.ArtistId
+ JOIN Track ON Album.AlbumId = Track.AlbumId
+ JOIN Artist a2 ON Track.Name LIKE CONCAT('%',a2.Name,'%')
+  AND a1.Name NOT LIKE a2.Name;
+----

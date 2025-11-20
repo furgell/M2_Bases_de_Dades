@@ -1,0 +1,68 @@
+= Activitat: Consultes d'agregació
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+== Base de dades
+
+Per aquests exercicis utilitzarem la base de dades
+link:https://github.com/lerocha/chinook-database[Chinook], que es pot utilitzar
+en diversos SGBD.
+
+La base de dades _Chinook_ modelitza una botiga de música digital. Inclou
+taules per àlbums, artistes, pistes (`Tracks`), clients, empleats i factures.
+
+Per importar-la al MySQL/MariaDB cal descarregar el fitxer
+link:https://github.com/lerocha/chinook-database/raw/master/ChinookDatabase/DataSources/Chinook_MySql_AutoIncrementPKs.sql[Chinook_MySQL_AutoIncrementPKs.sql]
+i importar-lo.
+
+== Consultes
+
+1. Consulta quants àlbums hi ha a la base de dades.
+2. Cerca quants grups (`Artist`) hi ha el nom dels quals comenci per l'article
+_The_.
+3. Amb dues consultes, cerca quants àlbums hi ha de _Deep Purple_.
+4. Amb dues consultes, cerca els tres grups dels quals hi ha més àlbums.
+5. Cerca la durada mitjana de totes les pistes. Volem el resultat en segons.
+6. Amb tres consultes, cerca els 5 àlbums que tenen una durada mitjana de les
+seves pistes més gran. De cada àlbum en volem el seu nom i el nom del grup.
+7. Amb dues consultes, cerca el nom dels tres gèneres dels quals en tenim més
+pistes.
+8. Cerca quantes pistes hi ha en què hi consti algun compositor.
+9. Cerca quants minuts de música disposem del compositor _Johann Sebastian Bach_.
+10. Cerca el preu mitjà per pista. En una segona consulta, els diversos preus
+que hi ha, i quantes pistes hi ha de cadascun d'ells.
+11. Selecciona els MB que ocupa cadascun dels àlbums. Ordena els resultats
+de més a menys MB. Per cada àlbum mostra el seu identificador i els MB que
+ocupa.
+12. Amb dues consultes, obté el nom de les llistes (`Playlist`) que contenen
+més de mil cançons.
+13. Descobreix quants clients tenen alguna dada introduïda a `State`. Fes-ho de
+dues maneres diferents.
+14. Descobreix quants clients tenim de cadascuna de les ciutats de Brasil.
+15. Descobreix de quines ciutats d'Estats Units i de França tenim més d'un
+client. Volem saber-ne el nom, si són d'un país o de l'altre, i quants clients
+hi ha.
+16. Amb dues consultes, troba quins països tenen exactament la mateixa
+quantitat de factures (`Invoice`) que el país que en té menys.
+17. Utilitzant només la taula `InvoiceLine`, calcula el preu total de la
+factura número 4. En una segona consulta, comprova que la informació coincideix
+amb la que hi ha a la taula `Invoice`.
+18. Utilitzant només la taula `InvoiceLine`, cerca quines factures tenen un
+preu total superior o igual a 20. Per a cadascuna mostra l'identificador de la
+factura i el preu total.
+19. Cerca els identificadors de les cançons que ens han reportat més de 2 dòlars
+de beneficis.
+20. Cerca des de quins països es fan comandes que, de mitjana, superen els 6
+dòlars de preu. Mostra el nom dels països i la mitjana de les comandes que li
+corresponen.
+21. Sabent que la funció `YEAR` ens permet seleccionar l'any d'una data, troba
+quants diners hem cobrat cada any. Ordena els resultats de més guanys a menys.
+22. Sabent que la funció `MONTH` ens permet seleccionar el mes d'una data,
+utilitza dues consultes per trobar per quins mesos la mitjana del preu de les
+factures supera la mitjana global. Ordena els resultats de mitjanes més gran a
+mitjanes més petites.

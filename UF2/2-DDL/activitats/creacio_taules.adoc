@@ -1,0 +1,26 @@
+= Llenguatges SQL: DDL
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+<<<
+
+== Activitat creació de taules
+
+1. A partir del
+link:UF1/3-model_relacional/solucions/activitats_extraescolars.adoc[model relacional]
+i del link:UF1/2-model_ER/solucions/activitats_extraescolars.png[diagrama ER] de
+l'activitat sobre
+link:UF1/2-model_ER/activitats/activitats_extraescolars.adoc[activitats extraescolars],
+construeix les sentències _CREATE TABLE_ necessàries per implantar la base de
+dades corresponent.
+
+2. Fes el mateix basant-te en el
+link:UF1/3-model_relacional/solucions/protectora.adoc[model relacional] i el
+link:UF1/2-model_ER/solucions/protectora.png[diagrama ER]
+de l'activitat sobre la
+link:UF1/2-model_ER/activitats/protectora_animals.adoc[protectora d'animals].

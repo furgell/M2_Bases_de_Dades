@@ -1,0 +1,119 @@
+= Activitat: Consultes complexes
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+== Base de dades
+
+Per aquests exercicis utilitzarem la base de dades _Chinook_.
+
+Totes les qüestions s'han de resoldre utilitzant una única consulta.
+
+== Consultes
+
+1. Cerca quants àlbums hi ha de _Deep Purple_.
+
+2. Mostra el nom i cognoms dels empleats que estan assignats com a suport
+d'algun client (`SupportRepId`).
+
+3. Mostra el nom i cognoms de *_tots_* els empleats i la quantitat de clients
+a qui estan assignats per donar suport.
+
+4. Troba el nom de totes les cançons de l'àlbum _Back to Black_ i el nom de
+l'artista que l'ha fet (sortirà repetits per cada tema).
+
+5. Troba els beneficis que hem obtingut amb el gènere _Blues_. Mostra'n
+l'identificador, el nom, i els beneficis.
+
+6. Troba els diners que hem fet per cadascun dels gèneres musicals. Mostra'n
+l'identificador, el nom, i els beneficis obtinguts dels gèneres pels quals n'hem
+obtingut algun benefici. Ordena els resultats de més a menys beneficis.
+
+7. Troba els beneficis que hem obtingut per cadascun dels gèneres musicals.
+Mostra'n l'identificador, el nom, i els beneficis. Volem una llista amb
+*_tots_* els gèneres, encara que no s'hagi venut cap cançó
+d'un gènere determinat. Ordena els resultats de més a menys beneficis, i en cas
+d'empat pel nom del gènere.
+
+8. Troba els beneficis que hem obtingut amb els gèneres pels quals n'hem obtingut
+més de 100 dòlars. Mostra'n l'identificador, el nom, i els beneficis. Ordena
+els resultats pels beneficis obtinguts, de més a menys.
+
+9. Troba el nom de tots els artistes que es diuen igual que alguna de les
+cançons.
+
+10. Volem una llista del nom i cognoms de *_tots_* els clients i de quantes
+comandes ha fet cadascun.
+
+11. Obté una llista de *_tots_* els gèneres de la base de dades (identificador
+i nom) i de quantes cançons hi ha de cada gènere.
+
+12. Cerca el nom dels tres grups dels quals hi ha més àlbums. Mostra'n el nom
+i la quantitat d'àlbums de cadascun.
+
+13. Cerca el nom dels grups dels quals hi ha més de 8 àlbums. Mostra'n el nom
+i la quantitat d'àlbums de cadascun. Ordena els resultats de més a menys àlbums,
+i en cas d'empat pel nom del grup.
+
+14. Cerca els 5 àlbums que tenen una durada mitjana de les seves pistes més gran.
+De cada àlbum en volem el seu nom, el nom del grup, i la durada mitjana de les
+seves pistes.
+
+15. Cerca el nom dels tres gèneres dels quals en tenim més pistes, i la
+quantitat de pistes de cadascun d'ells.
+
+16. Obté l'identificador, el nom, i la quantitat de cançons de les llistes
+(`Playlist`) que contenen més de mil cançons. Ordena els resultats de més a
+menys cançons, i en cas d'empat, per l'identificador de la llista.
+
+17. Cerca els noms de les cançons i els beneficis que ens han reportat
+d'aquelles cançons el benefici de les quals sigui de més de 2 dòlars. Ordena
+els resultats pels beneficis, de més a menys, i en cas d'empat, pel nom de la
+cançó.
+
+18. Troba el nom de totes les cançons, el nom de l'àlbum, i el nom de l'artista,
+que s'han comprat a la factura 225.
+
+19. Volem una llista de l'identificador i els noms de les cançons, del nom
+de l'àlbum al qual pertanyen, i del nombre de llistes de reproducció on
+apareixen, de totes les cançons que apareixen a més de quatre llistes de
+reproducció.
+
+20. Mostra la llista de reproducció anomenada _Grunge_. Volem veure una llista
+amb tots els títols de les cançons, la seva durada en segons
+i el nom de l'artista.
+
+21. Mostra el nom dels artistes i la quantitat de cançons del gènere _World_
+que han creat, pels artistes que n'han creat més de 5.
+
+22. Troba el nom de les cançons que ha comprat el client Enrique Muñoz, i la
+data en què s'ha comprat cadascuna de les cançons.
+
+23. Troba l'artista preferit de l'Enrique Muñoz (l'artista del qual ha comprat
+més cançons), i quantes cançons n'ha comprat.
+
+24. Obté una llista del nom i cognom de *_tots_* els empleats juntament amb el
+nom i cognom de l'empleat de qui depenen (`ReportsTo`).
+
+25. Volem la mateixa llista que a l'exercici anterior, però al revés: per a
+cada empleat, volem veure quins empleats depenen d'ell. Com abans, volem una
+llista amb tots els empleats.
+
+26. Volem la mateixa llista d'empleats que a l'exercici anterior, però només
+el nom i cognoms de cada empleat i la quantitat d'empleats que depenen d'ell.
+
+27. Troba el nom dels artistes que coincideix amb el nom d'alguna cançó d'un
+altre artista. Volem veure el nom dels dos artistes relacionats.
+
+28. Troba el nom dels artistes que coincideix amb part del nom d'alguna cançó
+d'un altre artista. Volem veure el nom dels dos artistes relacionats i el títol
+de la cançó.
++
+[TIP]
+====
+Utilitza la funció CONCAT per concatenar diverses cadenes de text.
+====

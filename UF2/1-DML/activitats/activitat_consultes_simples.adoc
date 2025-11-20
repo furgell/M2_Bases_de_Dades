@@ -1,0 +1,83 @@
+= Activitat: Consultes simples
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+== Base de dades
+
+Per aquests exercicis utilitzarem la base de dades MiniWind, una versió
+simplificada de NorthWind (aquesta base de dades s'utilitza com a base de dades
+de mostra per _MS Access_ i ha estat portada a MySQL).
+
+Cal baixar el fitxer link:db/mariadb/miniwind.sql[miniwind.sql] i importar-lo
+al MySQL/MariaDB.
+
+Aquesta base de dades és un bon exemple de base de dades per a una petita
+empresa. Inclou els empleats, els clients, les comandes, els productes, i els
+proveïdors.
+
+Per aquests exercicis només utilitzarem les taules `employees`, `products` i
+`orders`.
+
+== Consultes bàsiques
+
+1. Seleccionar de la taula `employees` tots els empleats de Washington. S'han
+d'ordenar els resultats pel cognom. Les dades que s'han de mostrar són
+l'identificador d'empleat, el cognom, i la posició laboral (`job_title`) que
+ocupa.
+
+2. Mostra l'identificador, el nom i el cognom dels empleats el cognom dels
+quals comenci per "J".
+
+3. Mostra els cognoms de la taula `employees` que tinguin una "e" en la segona
+posició.
+
+4. Mostra els noms de la taula `employees` que comencin per "T" i que continguin
+una "e".
+
+5. Mostra el cognom dels empleats la posició dels quals és "Sales Manager",
+"Sales Representative", o "Sales Coordinator". Escriu la sentència de dues
+formes fent servir dos operadors diferents.
+
+6. Mostra els cognoms dels empleats que no ocupin cap de les tres posicions
+anteriors. Escriu la sentència de dues formes fent servir dos operadors
+diferents.
+
+7. Mostra una llista dels empleats de Washington que sàpiguen francès (es diu a
+les notes), i d'Atlanta que no en sàpiguen. Volem veure el seu identificador, el
+nom, el cognom, la ciutat, i les notes.
+
+8. Mostra el nom i el proveïdor dels productes de la taula `products` que siguin
+*només* del proveïdor (`supplier_ids`) número 4 o només del 10. Escriu la
+sentència de dues formes diferents.
+
+9. Mostra el nom i el proveïdor dels productes de la taula `products` que *NO*
+siguin només del proveïdor 4 ni només del 10. Escriu la sentència de dues
+formes diferents.
+
+10. Obté el nom i el preu dels productes el preu dels quals (`list_price`) està
+comprès entre 10 i 20 (inclosos). Escriu la sentència de dues formes diferents.
+
+11. Obté el nom i el preu dels productes el preu dels quals *NO* està
+comprès entre 10 i 20. Escriu la sentència de dues formes diferents.
+
+12. Obté el nom dels productes, el preu i el número del proveïdor que tinguin
+un preu superior a 20 i que siguin només del proveïdor número 4 o només del
+número 10. Escriu la sentència de dues formes diferents.
+
+13. Mostra el nom, cost i preu dels productes pels quals la diferència entre el
+preu de cost (`standard_cost`) i el preu de venta sigui de més de 10.
+
+14. Selecciona la llista de productes (identificador i nom del producte) que
+contenen la paraula '_soup_' en el seu nom. Escriu la consulta de manera que
+funcioni correctament independentment de si la paraula '_soup_' s'escriu en
+majúscules o en minúscules.
+
+15. Fes una llista de les comandes (taula `orders`) que es van servir al client
+número 4 i que, a més, han tingut un cost d'enviament (`shipping_fee`) de més
+de 4 dòlars. Mostra el seu identificador, la data de la comanda, i el cost
+d'enviament.

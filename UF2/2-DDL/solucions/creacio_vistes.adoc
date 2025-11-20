@@ -1,0 +1,91 @@
+= Llenguatges SQL: DDL
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+<<<
+
+== Solució activitat creació de vistes
+
+Realitzarem aquesta activitat sobre la base de dades _Miniwind_.
+
+1. Crea la vista `profit_per_product` que contingui *tots* els productes (codi,
+nom i categoria), la quantitat total de cadascun dels productes venuts, i el
+benefici obtingut amb cadascun d'ells.
++
+Utilitza aquesta vista per cercar el benefici total obtingut per cadascuna de
+les categories _Condiments_, _Beverages_, i _Pasta_.
++
+[source,sql]
+----
+CREATE OR REPLACE VIEW profit_per_product AS
+SELECT product_code, product_name, category, SUM(quantity) AS total_quantity, SUM(quantity*unit_price) AS total_profit
+FROM products p
+LEFT JOIN order_details od ON p.id=od.product_id
+GROUP BY p.id, product_code, product_name, category
+
+SELECT category, SUM(total_profit)
+FROM profit_per_product
+WHERE category IN ('Condiments', 'Beverages', 'Pasta')
+GROUP BY category
+----
+
+2. Crea la vista `customer_products` que contingui *tots* els clients (id, nom i
+cognom), i una llista separada per comes sense repeticions del nom de tots els
+productes que ha comprat alguna vegada.
++
+Utilitza aquesta vista per cercar quins clients no han comprat mai cap producte.
++
+[source,sql]
+----
+CREATE OR REPLACE VIEW customer_products AS
+SELECT c.id, first_name, last_name, GROUP_CONCAT(DISTINCT product_name) AS all_products
+FROM customers c
+LEFT JOIN orders o ON o.customer_id=c.id
+LEFT JOIN order_details od ON od.order_id=o.id
+LEFT JOIN products p ON p.id=od.product_id
+GROUP BY c.id, first_name, last_name
+
+SELECT id, first_name, last_name
+FROM customer_products
+WHERE all_products IS NULL
+----
+
+3. Volem crear una vista que ens mostri un resum de les compres que ha fet
+cadascun dels clients.
++
+Crea la vista `order_list` amb les columnes següents:
++
+--
+- El nom i cognom del client.
+- Codi i nom del producte comprat.
+- Data de la compra.
+- Quantitat de productes comprats en aquella data.
+- Preu total de la compra.
+--
++
+Cada fila ha de contenir informació de la compra d'un sol producte per part
+d'un únic client en una data concreta.
++
+Utilitza aquesta vista per mostrar una llista de tots els clients i la
+quantitat de productes en total que ha adquirit cadascun d'ells durant el primer
+trimestre de l'any 2006.
++
+[source,sql]
+----
+CREATE OR REPLACE VIEW order_list AS
+SELECT first_name, last_name, product_code, product_name, order_date, quantity, quantity*unit_price AS total
+FROM customers c
+LEFT JOIN orders o ON c.id=o.customer_id
+LEFT JOIN order_details od ON od.order_id=o.id
+LEFT JOIN products p ON p.id=od.product_id
+
+SELECT first_name, last_name, IFNULL(SUM(quantity), 0) AS total_quantity
+FROM order_list
+WHERE (order_date>='2006-01-01' AND order_date<'2006-04-01') OR order_date IS NULL
+GROUP BY first_name, last_name
+----

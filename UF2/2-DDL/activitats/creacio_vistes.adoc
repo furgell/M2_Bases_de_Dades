@@ -1,0 +1,47 @@
+= Llenguatges SQL: DDL
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+<<<
+
+== Activitat creació de vistes
+
+Realitzarem aquesta activitat sobre la base de dades _Miniwind_.
+
+1. Crea la vista `profit_per_product` que contingui *tots* els productes (codi,
+nom i categoria), la quantitat total de cadascun dels productes venuts, i el
+benefici obtingut amb cadascun d'ells.
++
+Utilitza aquesta vista per cercar el benefici total obtingut per cadascuna de
+les categories _Condiments_, _Beverages_, i _Pasta_.
+
+2. Crea la vista `customer_products` que contingui *tots* els clients (id, nom i
+cognom), i una llista separada per comes sense repeticions del nom de tots els
+productes que ha comprat alguna vegada.
++
+Utilitza aquesta vista per cercar quins clients no han comprat mai cap producte.
+
+3. Volem crear una vista que ens mostri un resum de les compres que ha fet
+cadascun dels clients.
++
+Crea la vista `order_list` amb les columnes següents:
++
+--
+- El nom i cognom del client.
+- Codi i nom del producte comprat.
+- Data de la compra.
+- Quantitat de productes comprats en aquella data.
+- Preu total de la compra.
+--
++
+Cada fila ha de contenir informació de la compra d'un sol producte per part
+d'un únic client en una data concreta.
++
+Utilitza aquesta vista per mostrar una llista de tots els clients i la
+quantitat de productes en total que ha adquirit cadascun d'ells durant el primer
+trimestre de l'any 2006.

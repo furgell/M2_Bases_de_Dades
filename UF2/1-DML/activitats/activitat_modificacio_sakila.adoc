@@ -1,0 +1,63 @@
+= Activitat: Modificació de dades sobre sakila
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+== Base de dades
+
+Per aquests exercicis utilitzarem la base de dades _Sakila_.
+
+Per a cada qüestió, indica totes les sentències que has necessitat per a
+realitzar la modificació necessària. Intenta reduir la quantitat de sentències
+utilitzades.
+
+[IMPORTANT]
+====
+No es poden copiar dades a mà.
+
+Si es necessiten consultes intermèdies per resoldre una qüestió, cal guardar
+els valors necessaris en variables, o utilitzar subconsultes.
+====
+
+== Insercions
+
+1. Afegeix una nova actriu a la BD amb el nom _Charlize Theron_.
+
+2. Afegeix la pel·licula _Monster_ a la BD, de l'any 2003 i amb les mateixes
+característiques que la pel·lícula _BOOGIE AMELIE_.
+
+3. Afegeix l'actriu del primer exercici a la pel·lícula del segon exercici.
+
+4. Afegeix la pel·lícula _Monster_ a la categoria de _Drama_.
+
+5. Afegeix una nova pel·lícula, la que vulguis, amb les mateixes dades que la
+pel·lícula que tingui menys durada.
+
+6. Insereix una nova categoria amb el nom _Noir_.
+
+7. Afegeix un nou client de la ciutat on hi hagi més clients. La resta de dades
+les pots inventar.
+
+8. Fes les operacions que calgui per tal d'afegir un nou lloguer a aquest
+client.
+
+== Actualitzacions
+
+1. Augmenta en dos minuts la durada de les pel·lícules de la categoria d’acció.
+
+2. Canvia l’adreça de la clienta _Carol Garcia_. La seva nova adreça és
+_150 Blue Avenue_ enlloc de _320 Brest Avenue_.
+
+3. Disminueix un 10% la quantitat dels pagaments fets al juliol del 2005.
+
+== Eliminacions
+
+1. Esborra el client o els clients que hagin fet només un lloguer.
+
+2. Esborra la pel·lícula que dura menys de la BD.
+
+3. Esborra la categoria _Travel_.

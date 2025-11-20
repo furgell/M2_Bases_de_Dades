@@ -1,0 +1,72 @@
+= Transaccions
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+<<<
+
+== Activitat de transaccions
+
+=== Transaccions
+
+1. Determina quins motors d'emmagatzematge hi ha instal·lats al teu sistema que
+suportin transaccions.
+
+2. Comprova l'estat actual de l'`autocommit`. Si està activat, desactiva'l.
+
+3. Comença una nova transacció.
+
+4. Insereix una nova línia a la taula `rental` de la base de dades `sakila`.
+Insereix una fila associada a la taula `payment`. Comprova que les dues files
+s'ha inserit.
+
+5. Desfés la transacció. Comprova que les files anteriors no són a la base de
+dades.
+
+6. Comença una nova transacció.
+
+7. Insereix les mateixes files que abans. Confirma la transacció i comprova que
+les files són a la base de dades.
+
+=== Concurrència
+
+1. Obre dues sessions contra el servidor de MariaDB. Canvia el _prompt_ de la
+primera a `s1>` i de la segona a `s2>`. Desactiva l'autocommit a les dues session.
+
+2. Comprova el nivell d'aïllament de la sessió `s1`.
+
+3. Comprova quin és l'id més alt que hi ha a la taula `rental` de la base de
+dades `sakila`.
+
+4. A `s2` comença una nova transacció.
+
+5. A `s2` selecciona les 10 últimes files de la taula `rental`.
+
+6. A la sessió `s1` comença una nova transacció i insereix una nova fila a la
+taula `rental`.
+
+7. A la sessió `s2` selecciona de nou les últimes files de la taula `rental`.
+Apareix la fila que has inserit en el pas anterior?
+
+8. A la sessió `s1` confirma la transacció.
+
+9. Pots veure ara la nova fila a la sessió `s2`?
+
+10. Confirma la transacció a `s2`. Pots veure ara la nova fila?
+
+11. Des de `s1` comença una nova transacció i esborra la fila que has inserir
+anteriorment.
+
+12. A `s2` canvia el nivell d'aïllament a `READ UNCOMMITED` i confirma el canvi.
+
+13. A `s2` comença una nova transacció i selecciona de nou els últims lloguers.
+Quin problema hi ha en aquesta lectura?
+
+14. A `s1` anul·la els canvis de la transacció actual. Selecciona els últims
+lloguers.
+
+15. Fes la mateixa consulta a `s2`. Obtenim els mateixos resultats?

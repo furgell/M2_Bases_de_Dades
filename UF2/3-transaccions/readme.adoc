@@ -1,0 +1,349 @@
+= Transaccions i concurrència
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+<<<
+
+== ACID: Atomic, Consistent, Isolated, Durable
+
+- **Atomic**: les transaccions s'executen com una unitat, és a dir, o s'executen
+bé completament, o es cancel·len senceres.
+
+- **Consistent**: el SGBD només permet guardar dades que són consistents amb les
+regles definides en el seu disseny. Per exemple, no accepta valors negatius per
+a les quantitats en una taula d'inventari.
+
+- **Isolated**: l'execució de les transaccions és independent de factors
+externs. Per exemple, si estem realitzant una venta que modifica l'inventari,
+no poden haver-hi altres modificacions a l'inventari que afectin a la venta que
+està a mitges.
+
+- **Durable**: un cop s'ha confirmat una transacció, les dades s'han d'haver
+guardat definitivament a la base de dades.
+
+== Transaccions
+
+Una **transacció** és una sèrie d'operacions de manipulació de dades sobre una
+base de dades que es tracten com una única tasca. Això significa que totes les
+operacions es realitzen com si es tractés d'una única operació unitària.
+
+Per a realitzar una transacció, el SGBD realitza cadascuna de les operacions en
+un espai temporal, de manera que no afecta a les dades guardades a la base de
+dades. Les diverses operacions, però, es poden executar en aquest espai temporal
+tenint en compte que unes poden dependre dels resultats de les anteriors.
+
+Finalment, quan el resultat final de la transacció ha estat calculat, tots els
+canvis passen a la base de dades, sense que s'hagin de tornar a calcular.
+
+Un exemple clàssic de transacció consisteix en el traspàs d'una quantitat de
+diners d'un compte corrent a un altre. Un traspàs requereix dues operacions
+sobre la base de dades: la disminució del capital disponible del compte origen
+i l'augment del capital del compte destí.
+
+És evident que si per algun motiu només es realitzés una de les dues operacions
+es crearia una situació problemàtica, així que el sistema ha de garantir que
+es realitzen les dues operacions o no se'n realitza cap.
+
+=== Motors
+
+Un motor de base de dades és la part del programari del SGBD que s'encarrega
+de llegir i guardar les dades a la base de dades. El MySQL/MariaDB implementa
+diversos motors, cadascun amb unes característiques pròpies que el fan idoni
+per determinades situacions. No tots els motors accepten transaccions, així que
+aquest serà un aspecte important a tenir en compte a l'hora de triar-ne un.
+Cada taula d'una base de dades pot utilitzar un motor diferent.
+
+Alguns dels motors més habituals són:
+
+- *InnoDB*: és el motor per defecte en MySQL. La major part de taules utilitzaran
+_InnoDB_. És conforme a ACID i accepta transaccions. Permet el bloqueig per files,
+té integritat referencial (claus foranes), i optimitza les consultes per claus
+primàries.
+
+- *MyISAM*: és un motor molt ràpid que no accepta transaccions i té un baix
+rendiment quan s'està escrivint des de diverses connexions. Tampoc té integritat
+referencial. S'utilitza en taules de només lectura (o gairebé). El MariaDB
+proposa _Aria_ com una versió modernitzada de _MyISAM_.
+
+- *Memory*: guarda les dades a memòria en comptes de fer-ho a disc. Això
+incrementa la velocitat d'accés, però les dades es poden perdre si el servidor
+cau. Amb la millora dels caus de memòria de _InnoDB_, cada cop s'utilitza menys.
+
+Podem veure una llista de tots els motors disponibles amb `SHOW ENGINES`.
+
+=== Instruccions de control de transaccions
+
+S'utilitzen les següents instruccions per controlar les transaccions:
+
+- `START TRANSACTION`: comença una nova transacció. Si estàvem en una
+transacció anterior, es força un _COMMIT_.
+
+- `COMMIT`: confirma els canvis i els fa permanents a la base de dades.
+
+- `ROLLBACK`: anul·la tota la transaccions i cancel·la tots els canvis que
+s'haguessin fet.
+
+==== Autocommit
+
+El MySQL/MariaDB pot treballar de dues formes diferents pel que fa a les
+transaccions: amb l'_autocommit_ activat, o desactivat.
+
+Si l'_autocommit_ està activat, qualsevol sentència SQL inicia una transacció, i
+executa un _COMMIT_ en cas que sigui exitosa. Si no ho és, executa un
+_ROLLBACK_. Per defecte, l'_autocommit_ està activat.
+
+Aquest mode és útil en molts casos, perquè garanteix que cada instrucció
+s'executa completament o no s'executa en absolut.
+
+El problema ve quan volem que diverses sentències es tractin com una sola
+transacció. En aquest cas desactivarem l'_autocommit_.
+
+Amb l'_autocommit_ desactivat les transaccions es mantenen obertes fins que
+es confirmen o es cancel·len explícitament (amb un _COMMIT_ o un
+_ROLLBACK_).
+
+Es comença una nova transacció automàticament quan es confirma o cancel·la
+l'anterior. Les sentències que fallen només anul·len els seus propis canvis,
+però la transacció es manté oberta.
+
+Per activar i desactivar l'_autocommit_ utilitzem:
+
+[source,sql]
+----
+SET AUTOCOMMIT = 1 | 0
+----
+
+O de forma equivalent:
+
+[source,sql]
+----
+SET @@autocommit := 1 | 0
+----
+
+Per veure'n l'estat actual:
+
+[source,sql]
+----
+SELECT @@autocommit;
+----
+
+==== COMMIT implícit
+
+A banda de la sentència `COMMIT`, hi ha algunes instruccions que provoquen un
+_COMMIT_ automàtic de la transacció. És el cas de `START TRANSACTION`,
+`SET AUTOCOMMIT = 1`, `TRUNCATE`, i moltes sentències de definició de dades o
+de gestió d'usuaris.
+
+== Concurrència
+
+=== Nivells d'aïllament de les transaccions
+
+Problemes de consistència que es poden donar:
+
+- **Dirty reads** (_lectures brutes_): una transacció pot llegir dades
+modificades per altres transaccions que encara no s'han confirmat.
+
+- **Non-repeatable reads** (_lectures no repetibles_): la mateixa lectura de
+dades dóna diferents resultats en moments diferents dins de la mateixa
+transacció, perquè una altra transacció les ha modificades.
+
+- **Phantom reads** (_lectures fantasma_): es tracta de files que aparexien en
+una lectura, però que no eren visibles en la mateixa lectura de la mateixa
+transacció un moment abans.
+
+El nivell d'aïllament (_isolation_) es pot configurar segons les necessitats. Hi
+ha quatre nivells d'aïllament diferents:
+
+- **Read uncommitted**: permet que una transacció pugui veure els canvis no
+confirmats que ha fet una altra transacció. Aquest nivell de transacció permet
+l'observació de tots els problemes de consistència que s'han descrit. És el
+nivell més ràpid, però només s'utilitza en casos concrets en què no és
+importants si les dades llegides són vàlides.
+
+- **Read committed**: en aquest nivell una transacció només pot veure les dades
+que altres transaccions ja han confirmat. Amb això s'eviten les lectures brutes,
+però poden aparèixer lectures no repetibles i lectures fantasma (si una
+transacció ha confirmat canvis durant l'execució d'una altra transacció).
+
+- **Repeatable read**: en aquest nivell es garanteix que repetir la mateixa
+lectura de dades durant una transacció resultarà en exactament els mateixos
+resultats, independentment de què facin altres transaccions. Depenent de la
+implementació, encara poden aparèixer files fantasma (no és el cas amb InnoDB).
+Aquest nivell d'aïllament és el que s'utilitza per defecte. Per aconseguir
+aquest nivell es creen captures (_snapshots_) de les dades que es llegeixen, de
+manera que encara que les dades originals siguin modificades per una altra
+transacció, la transacció que ha fet la captura pugui recuperar els mateixos
+resultats.
+
+- **Serializable**: aquest nivell aïlla completament les transaccions entre
+elles, assegurant que no es produirà cap dels problemes de consistència
+esmentats. Per aconseguir-ho no es permet que una transacció pugui modificar
+dades que una altra transacció ha llegit o ha modificat fins que aquesta altra
+transacció acaba.
+
+Com més amunt a la llista, més ràpides són les transaccions, però menys
+segures.
+
+==== Exemples
+
+Preparem dues sessions:
+
+----
+prompt s1>
+set autocommit = off;
+set session transaction isolation level read uncommitted;
+select @@autocommit;
+select @@tx_isolation;
+----
+
+----
+prompt s2>
+set autocommit = off;
+set session transaction isolation level read uncommitted;
+select @@autocommit;
+select @@tx_isolation;
+----
+
+- Dirty read
+
+----
+s2> start transaction;
+s2> update film set title='' where film_id=1;
+----
+
+----
+s1> select title from film where film_id=1;
+----
+
+----
+s2> rollback;
+----
+
+- Non-repeatable read
+
+----
+s1> start transaction;
+s1> select title from film where film_id=1;
+----
+
+----
+s2> start transaction;
+s2> update film set title='' where film_id=1;
+s2> commit;
+----
+
+----
+s1> select title from film where film_id=1;
+----
+
+- Phantom read
+
+----
+s1> start transaction;
+s1> select title from film where film_id>=1000;
+----
+
+----
+s2> start transaction;
+s2> insert into film values(1001, '', '', 2006, 1, NULL, 3, 5, 50, 19, 'NC-17', '', NOW());
+s2> commit;
+----
+
+----
+s1> select title from film where film_id>=1000;
+----
+
+== Bloquejos
+
+Quan diversos usuaris accedeixen simultàniament a les mateixes dades d'una base
+de dades es poden produir problemes. Per evitar-ho, el servidor bloqueja les
+dades a què s'està accedint. La idea és que el primer client que hi accedeix
+obté un bloqueig de les dades, i els altres s'han d'esperar a què la seva
+operació acabi. Això evita que es realitzin operacions contradictòries.
+
+Els bloquejos que s'apliquen depenen del motor i de si l'accés és de lectura o
+d'escriptura.
+
+Quan un client llegeix dades, obté un bloqueig _no exclusiu_. Això significa que
+altres clients poden llegir dades simultàniament, però cap d'ells les pot
+modificar.
+
+En canvi, quan un client està modificant dades, tots els altres clients s'han
+d'esperar a la finalització de l'escriptura per poder llegir o modificar les
+dades.
+
+En general, el propi sistema aplica els bloquejos necessaris, però també podem
+afegir un modificar a sentències SELECT quan preveiem possibles problemes.
+
+- Podem afegir `LOCK IN SHARE MODE` si volem obtenir un bloqueig no exclusiu.
+Aquest modificador s'afegeix automàticament si estem al nivell d'aïllament
+_SERIALIZABLE_. Podem afegir-lo quan estem al nivell _REPEATABLE READ_ per
+forçar que altres clients no puguin modificar les files que estem consultant.
++
+Per exemple, imaginem que volem afegir un exemplar de la pel·lícula
+_CITIZEN SHREK_ a la botiga 1. Podríem executar:
++
+[source,sql]
+----
+SELECT film_id FROM film WHERE title LIKE 'CITIZEN SHREK';
+INSERT INTO inventory(film_id, store_id) VALUES (153, 1);
+----
++
+La primera sentència ens permet comprovar que la pel·lícula existeix i quin és
+el seu identificador, i la segona executa la inserció.
++
+El problema aquí és que podria passar que algú hagués eliminat la pel·lícula
+153 entre la primera i la segona sentència, i llavors l'INSERT ens donaria un
+error d'integritat referencial.
++
+Per evitar-ho, podem fer:
++
+[source,sql]
+----
+SELECT film_id FROM film WHERE title LIKE 'CITIZEN SHREK' LOCK IN SHARE MODE;
+INSERT INTO inventory(film_id, store_id) VALUES (153, 1);
+----
++
+Ara, hem bloquejat qualsevol canvi que es pugui fer a la pel·lícula, i així
+ens assegurem que la segona sentència no pot fallar.
+
+- Podem afegir `FOR UPDATE` per obtenir un bloqueig exclusiu, de manera que
+ningú pugui llegir o modificar les files consultades.
++
+Per exemple, imaginem que volem afegir un artista a la base de dades Chinook,
+i que estem utilitzant la versió sense claus autonumèriques:
++
+[source,sql]
+----
+SELECT MAX(ArtistId) INTO @maxartistid FROM Artist;
+INSERT INTO Artist(ArtistId, Name) VALUES (@maxartistid+1, 'The Knife');
+----
++
+El problema en aquest cas és que un altre client podria estar inserint un
+artista nou de la mateixa manera, i obtenir el mateix nombre a la primera
+consulta. Aleshores, el primer INSERT que arribi funcionarà, però el segon
+fallarà perquè intentarà utilitzar una clau primària repetida.
++
+Per evitar-ho podem fer:
++
+[source,sql]
+----
+SELECT MAX(ArtistId) INTO @maxartistid FROM Artist FOR UPDATE;
+INSERT INTO Artist(ArtistId, Name) VALUES (@maxartistid+1, 'The Knife');
+----
++
+Ara estem bloquejant completament la lectura sobre `ArtistId`, de manera que
+ens assegurem que ningú pugui llegir el mateix valor fins que el nostre
+INSERT hagi acabat.
+
+[NOTE]
+====
+Noteu que els últims exemples només tenen sentit si executem les dues
+sentències dins d'una mateixa transacció, i impliquen, per tant, que hem
+desactivar l'_autocommit_.
+====

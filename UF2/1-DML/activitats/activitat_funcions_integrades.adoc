@@ -1,0 +1,121 @@
+= Activitat: Consultes de funcions integrades
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+== Base de dades
+
+Per aquests exercicis utilitzarem la base de dades
+link:db/mariadb/sakila_onlytables/[Sakila]. Aquesta base de
+dades és una de les que es proporcionen com exemple pel MySQL.
+
+Per instal·lar-la cal importar primer el fitxer `sakila-schema.sql`, que
+crea l'estructura de la base de dades, i després el fitxer
+`sakila-data.sql`, que n'afegeix el contingut.
+
+== Consultes
+
+1. Volem saber quants diners hem fet en total per a cada pel·lícula (per cada
+títol diferent, no per cada exemplar que tenim) i per cada botiga. El resultat
+ha de ser una llista de títols de pel·lícula, números de botigues, i
+quantitats, ordenada alfabèticament pel títol de les pel·lícules, i per la
+mateixa pel·lícula, per l'identificador de la botiga.
+
+2. Cerca el nom i cognom de tots els clients que tenen alguna pel·lícula
+llogada. També volem saber el nom de la pel·lícula que tenen en lloguer, el
+número d'ítem d'inventari de què es tracta, i la data en què es va llogar.
+Ordena els resultats per la data de lloguer, pel cognom i nom del client, i pel
+número d'ítem d'inventari.
++
+[TIP]
+====
+La taula `rental` conté un NULL a la columna `return_date` si un
+lloguer no s'ha retornat encara.
+====
+
+3. Una client de nom _Kelly Torres_ ens pregunta si mai ha llogat la
+pel·lícula de títol _ALASKA PHANTOM_. Fes una consulta que ens permeti
+contestar a aquesta pregunta. Si la resposta és sí, volem que la consulta ens
+mostri la data en què la va llogar.
+
+4. Volem una llista que ens digui quantes pel·lícules s'han llogat cada mes,
+des del juliol de 2005 fins a l'abril de 2006. La consulta ha de mostrar la
+quantitat de lloguers, el número del mes, i l'any. Ordena els resultats de més
+modern a més antic.
+
+5. Volem una llista de tots els lloguers que es van fer entre el 15 i el 20 de
+juny de 2005 (inclosos). Per cada lloguer volem veure el nom i cognom del
+client, el títol de la pel·lícula llogada, la data del lloguer, la data de
+retorn (si s'ha retornat), i la data màxima de retorn. Si la pel·lícula no s'ha
+retornat, a la data de retorn volem obtenir un guionet. Ordena els resultats per
+la data de lloguer i el títol de la pel·lícula.
++
+[TIP]
+====
+La data màxima de retorn es calcula com la data en què es fa el
+lloguer més el nombre de dies que s'indica a la columna `rental_duration`
+de la taula `film`.
+====
+
+6. Volem saber quines són les hores en què més lloguers es fan. Mostra un
+recompte de quants lloguers s'han donat en total per cada hora del dia. Ordena
+el resultat per l'hora.
+
+7. Volem una llista de quants lloguers s'han fet cada dia d'abril i maig
+de 2005. Per cada dia s'ha de mostrar la data i la quantitat de lloguers. Ordena
+els resultats per la data.
+
+8. Volem saber qui és l'actor o actriu preferida d'en Austin Cintron. Per això
+mirarem els actors que actuen a les pel·lícules que ha llogat i comptarem quants
+cops apareix cada actor. Considerarem que el seu actor preferit és el que
+apareix més vegades. Mostra la quantitat de vegades que apareix el seu actor
+preferit, i el nom i cognom d'aquest actor.
+
+9. Volem obtenir una llista que ens mostri les ciutats per les quals tenim
+més d'un client. Volem veure quants clients hi ha a cadascuna d'aquesta ciutats,
+amb els seus països respectius, i volem la llista ordenada pel nombre de
+clients. En cas que dues ciutats tinguin el mateix nombre de clients,
+ordena-les pel seu nom.
+
+10. Volem obtenir una llista que mostri totes les categories de totes les
+pel·lícules el títol de les quals conté la paraula _AFFAIR_.
+
+11. Volem obtenir una llista amb tots els lloguers que s'han retornat fora de
+termini. Per a cada lloguer volem veure el seu identificador, la data de
+lloguer, la data de retorn, la duració en dies que es pot llogar la pel·lícula,
+la quantitat que s'ha pagat per aquest lloguer, i amb quants dies de retard
+s'ha tornat el lloguer.
+
+12. Cerca els exemplars que tenim disponibles de la pel·lícula
+"SUSPECTS QUILLS", és a dir, els exemplars que no estan llogats en aquest
+moment. Per a cada exemplar volem saber-ne el seu identificador, l'identificador
+de la botiga on es troba, i l'adreça completa on és aquesta botiga (les dues
+línies d'adreça, la ciutat i el país). Ordena els resultats per l'identificador
+de l'ítem d'inventari.
+
+13. Volem obtenir l'historial de lloguers de tots els exemplars de la
+pel·lícula _JEKYLL FROGMEN_. La llista ha d'incloure l'ítem d'inventari, el
+nom i cognom del client que l'ha llogada, la data en què l'ha llogada i la data
+de retorn (si s'ha retornat). Ordena els resultats per l'identificador de
+l'inventari, i després per la data de lloguer.
+
+14. Demostra que la contrasenya de l'empleat Mike és '12345' i que s'ha xifrat
+utilitzant l'algorisme SHA. Mostra l'identificador, nom, cognom, i nom d'usuari
+dels empleats que tenen '12345' com a contrasenya.
+
+15. Cerca si hi ha algun exemplar que no s'hagi llogat mai. Volem saber l'id
+de l'exemplar, l'id de la botiga on es troba, i el títol de la pel·lícula de
+què es tracta.
+
+16. Fes una consulta que ens mostri l'idioma original de les pel·lícules.
+Si el camp `original_language_id` és NULL vol dir que l'idioma original és el
+mateix en què està la pel·lícula, i que es guarda a `language_id`. En canvi,
+si `original_language_id` és diferent de NULL, `language_id` guarda l'idioma
+a què s'ha doblat la pel·lícula.
++
+Per a cada pel·lícula volem veure el seu títol i el nom de l'idioma
+original.

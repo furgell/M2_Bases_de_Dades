@@ -1,0 +1,327 @@
+= Activitat: Subconsultes
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+== Solucions
+
+1. Cerca quantes cançons hi ha que costin tant com la que costa més.
++
+[source,sql]
+----
+SELECT COUNT(*)
+ FROM Track
+ WHERE UnitPrice = (
+   SELECT MAX(UnitPrice)
+    FROM Track
+ );
+----
+
+2. De les cançons de preu màxim, mostra el nom de les cinc últimes
+alfabèticament.
++
+[source,sql]
+----
+SELECT Name
+ FROM Track
+ WHERE UnitPrice = (
+   SELECT MAX(UnitPrice)
+    FROM Track
+ )
+ ORDER BY Name DESC
+ LIMIT 5;
+----
+
+3. Mostra el nom i durada (en minuts) de les cançons que duren més de tres
+vegades la durada mitjana de totes les cançons. Ordena-les pel seu nom.
++
+[source,sql]
+----
+SELECT Name, Milliseconds/60000
+ FROM Track
+ WHERE Milliseconds > 3*(
+   SELECT AVG(Milliseconds)
+    FROM Track
+ )
+ ORDER BY Name;
+----
+
+4. Cerca quines cançons tenen una durada superior a la que té la cançó
+_Take the Celestra_. De cada cançó mostra'n el seu nom i la durada, en format
+hora:minuts:segons (utilitza la funció `TIME_FORMAT`). Ordena els resultats
+pel nom.
++
+[source,sql]
+----
+SELECT Name, TIME_FORMAT(SEC_TO_TIME(Milliseconds/1000), '%H:%i:%s') AS Duration
+ FROM Track
+ WHERE Milliseconds > (
+   SELECT Milliseconds
+    FROM Track
+    WHERE Name LIKE 'Take The Celestra'
+ )
+ ORDER BY Name;
+----
+
+5. Cerca els tres grups/artistes dels quals hi ha més àlbums. Mostra'n només el
+nom, ordenat alfabèticament.
++
+[source,sql]
+----
+SELECT Name
+ FROM Artist
+ WHERE ArtistId IN (
+   SELECT * FROM (
+       SELECT ArtistId
+        FROM Album
+        GROUP BY ArtistId
+        ORDER BY COUNT(*) DESC
+        LIMIT 3
+   ) AS t
+ )
+ ORDER BY Name;
+----
+
+6. El preu total d'una factura es pot trobar de dues maneres a la base de
+dades: utilitzant la taula `InvoiceLine`, o mirant directament el `Total` a la
+taula `Invoice`. Fes una consulta que detecti qualsevol incongruència entre
+aquestes dues xifres, és a dir, que mostri les factures per les quals no
+coincideix aquest càlcul. Mostra l'id i el total de cada factura, i ordena-les
+pel seu id.
++
+[source,sql]
+----
+SELECT InvoiceId, Total
+ FROM Invoice i
+ WHERE Total != (
+   SELECT SUM(UnitPrice*Quantity)
+    FROM InvoiceLine il
+    WHERE il.InvoiceId=i.InvoiceId
+ )
+ ORDER BY InvoiceId;
+----
+
+7. Cerca quins àlbums tenen tantes cançons com l'àlbum anomenat
+_Live After Death_. Mostra el seu títol i la quantitat de cançons que tenen, i
+ordena els resultats pel títol.
++
+[source,sql]
+----
+SELECT Title, COUNT(*) AS NTracks
+ FROM Track t
+ JOIN Album a ON t.AlbumId=a.AlbumId
+ GROUP BY t.AlbumId, Title
+ HAVING NTracks = (
+    SELECT COUNT(*)
+     FROM Track t
+     JOIN Album a ON t.AlbumId=a.AlbumId
+     WHERE Title LIKE 'Live After Death'
+ )
+ ORDER BY Title;
+----
+
+8. Cerca quins àlbums tenen menys cançons. Mostra'n el títol i la quantitat de
+cançons, i ordena els resultats pel títol.
++
+[source,sql]
+----
+SELECT Title, COUNT(*) AS NTracks
+ FROM Album a
+ JOIN Track t ON a.AlbumId=t.AlbumId
+ GROUP BY t.AlbumId, Title
+ HAVING NTracks = (
+   SELECT MIN(NTracks)
+    FROM (
+      SELECT COUNT(*) AS NTracks
+       FROM Track t
+       GROUP BY t.AlbumId
+   ) AS temp
+ )
+ ORDER BY Title;
+----
+
+9. Cerca l'id, el nom i el cognom dels clients que han comprat tantes cançons
+com la clienta anomenada _Camille Bernard_. Mostra també la quantitat de cançons
+comprades, i ordena els resultats per l'id dels clients.
++
+[source,sql]
+----
+SELECT c.CustomerId, FirstName, LastName, SUM(Quantity) as TotalTracks
+ FROM Customer c
+ JOIN Invoice i ON c.CustomerId=i.CustomerId
+ JOIN InvoiceLine il ON i.InvoiceId=il.InvoiceId
+ GROUP BY c.CustomerId, FirstName, LastName
+ HAVING TotalTracks = (
+     SELECT SUM(Quantity)
+      FROM Customer c
+      JOIN Invoice i ON c.CustomerId=i.CustomerId
+      JOIN InvoiceLine il ON i.InvoiceId=il.InvoiceId
+      WHERE FirstName LIKE 'Camille'
+       AND LastName LIKE 'Bernard'
+ )
+ ORDER BY c.CustomerId;
+----
+
+10. Cerca quins àlbums tenen una durada inferior a l'àlbum anomenat
+_Bach: Goldberg Variations_. Mostra el títol i la durada en minuts, i ordena
+els resultats pel títol.
++
+[source,sql]
+----
+SELECT Title, SUM(Milliseconds)/60000 AS Duration
+ FROM Album a
+ JOIN Track t ON a.AlbumId=t.TrackId
+ GROUP BY a.AlbumId, Title
+ HAVING SUM(Milliseconds) < (
+     SELECT SUM(Milliseconds)
+      FROM Track t
+      JOIN Album a ON t.AlbumId=a.AlbumId
+      WHERE Title LIKE 'Bach: Goldberg Variations'
+ )
+ ORDER BY Title;
+----
+
+11. Cerca els àlbums la durada dels quals té una diferència de com a màxim un
+10% amb la durada de l'àlbum _Bach: Golberg Variations_. És a dir, si aquest
+àlbum dura, per exemple, 200 minuts, agafaríem tots els àlbums la durada dels
+quals estigui entre 180 i 220 minuts. Mostra el títol i la durada en minuts, i
+ordena els resultats pel títol.
++
+[source,sql]
+----
+SELECT Title, SUM(Milliseconds)/60000 AS Duration
+ FROM Album a
+ JOIN Track t ON a.AlbumId=t.TrackId
+ GROUP BY a.AlbumId, Title
+ HAVING SUM(Milliseconds)>=0.9*(
+     SELECT SUM(Milliseconds)
+      FROM Track t
+      JOIN Album a ON t.AlbumId=a.AlbumId
+      WHERE Title LIKE 'Bach: Goldberg Variations'
+ ) AND SUM(Milliseconds)<=1.1*(
+     SELECT SUM(Milliseconds)
+      FROM Track t
+      JOIN Album a ON t.AlbumId=a.AlbumId
+      WHERE Title LIKE 'Bach: Goldberg Variations'
+ )
+ ORDER BY Title;
+----
+
+12. Cerca els clients que han fet menys comandes que tots els clients de
+Noruega (_Norway_). Mostra l'id, el nom i el cognom dels clients, i la quantitat
+de comandes que han fet. Ordena els resultats per l'id dels clients.
++
+[source,sql]
+----
+SELECT c.CustomerId, FirstName, LastName, COUNT(i.InvoiceId) AS NInvoices
+ FROM Customer c
+ LEFT JOIN Invoice i ON i.CustomerId=c.CustomerId
+ GROUP BY c.CustomerId, FirstName, LastName
+ HAVING NInvoices < ALL (
+    SELECT COUNT(i.InvoiceId) AS NInvoices
+     FROM Invoice i
+     RIGHT JOIN Customer c ON c.CustomerId=i.CustomerId
+     WHERE c.Country LIKE 'Norway'
+     GROUP BY c.CustomerId
+ )
+ ORDER BY c.CustomerId;
+----
+
+13. Cerca els clients que han gastat menys que tots els clients de Noruega
+(_Norway_). Mostra l'id, el nom i el cognom dels clients, i la quantitat total
+que han gastat. Ordena els resultats per l'id dels clients.
++
+[source,sql]
+----
+SELECT c.CustomerId, FirstName, LastName, SUM(Total) AS TotalSpending
+ FROM Customer c
+ LEFT JOIN Invoice i ON i.CustomerId=c.CustomerId
+ GROUP BY c.CustomerId, FirstName, LastName
+ HAVING TotalSpending < ALL (
+     SELECT SUM(Total) AS TotalSpending
+      FROM Invoice i
+      RIGHT JOIN Customer c ON c.CustomerId=i.CustomerId
+      WHERE c.Country LIKE 'Norway'
+      GROUP BY c.CustomerId
+ )
+ ORDER BY c.CustomerId;
+----
+
+14. Cerca els clients que han gastat un 20% més que almenys un dels clients de
+Noruega (_Norway_). Mostra l'id, el nom i el cognom dels clients, i la quantitat
+total que han gastat. Ordena els resultats per l'id dels clients.
++
+[source,sql]
+----
+SELECT c.CustomerId, FirstName, LastName, SUM(Total) AS TotalSpending
+ FROM Customer c
+ LEFT JOIN Invoice i ON i.CustomerId=c.CustomerId
+ GROUP BY c.CustomerId, FirstName, LastName
+ HAVING TotalSpending >= ANY (
+     SELECT 1.2*SUM(Total)
+      FROM Invoice i
+      RIGHT JOIN Customer c ON c.CustomerId=i.CustomerId
+      WHERE c.Country LIKE 'Norway'
+      GROUP BY c.CustomerId
+ )
+ ORDER BY c.CustomerId;
+----
+
+15. Troba quins països tenen exactament la mateixa quantitat de factures
+(_Invoice_) que el país que en té menys. Mostra el nom del país i la quantitat
+de factures que té, i ordena els resultats pel nom del país.
++
+[source,sql]
+----
+SELECT Country, COUNT(InvoiceId) AS NInvoices
+ FROM Customer c
+ LEFT JOIN Invoice i ON c.CustomerId=i.CustomerId
+ GROUP BY Country
+ HAVING NInvoices <= ALL (
+     SELECT COUNT(InvoiceId) AS NInvoices
+      FROM Customer c
+      LEFT JOIN Invoice i ON c.CustomerId=i.CustomerId
+      GROUP BY Country
+ )
+ ORDER BY Country;
+----
+
+16. Cerca els clients als quals se'ls ha facturat alguna vegada a una adreça
+de França. Utilitza `EXISTS`. Mostra l'id, el nom i el cognom dels clients, i
+ordena els resultats per l'id dels clients.
++
+[source,sql]
+----
+SELECT c.CustomerId, FirstName, LastName
+ FROM Customer c
+ WHERE EXISTS (
+     SELECT *
+      FROM Invoice i
+      WHERE i.CustomerId=c.CustomerId
+       AND BillingCountry LIKE 'France'
+ )
+ ORDER BY c.CustomerId;
+----
+
+17. Cerca els clients que mai han comprat una cançó composta per en Johann
+Sebastian Bach. Utilitza `NOT EXISTS`. Mostra l'id, el nom i el cognom dels
+clients, i ordena els resultats per l'id dels clients.
++
+[source,sql]
+----
+SELECT c.CustomerId, FirstName, LastName
+ FROM Customer c
+ WHERE NOT EXISTS (
+     SELECT *
+      FROM Track t
+      JOIN InvoiceLine il ON t.TrackId=il.TrackId
+      JOIN Invoice i ON i.InvoiceId=il.InvoiceId
+      WHERE i.CustomerId=c.CustomerId
+       AND t.Composer LIKE 'Johann Sebastian Bach'
+ )
+ ORDER BY c.CustomerId;
+----

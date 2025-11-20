@@ -1,0 +1,140 @@
+= Llenguatges SQL: DDL
+:doctype: article
+:encoding: utf-8
+:lang: ca
+:toc: left
+:toclevels: 3
+:numbered:
+:ascii-ids:
+
+<<<
+
+== Activitat modificació de taules
+
+Realitzarem aquesta activitat sobre la base de dades _Miniwind_.
+
+El camp `supplier_ids` de la taula `products` és un clar exemple de mal
+disseny: estem utilitzant un atribut multivaluat i no s'està garantint la
+integritat referencial amb la taula `suppliers`. Anem a arreglar-ho.
+
+1. La relació entre `products` i `suppliers` és una relació de molts a molts.
+Crea la taula intermèdia de la relació. Crea-la sense clau primària ni claus
+foranes.
++
+[source,sql]
+----
+CREATE TABLE product_supplier (
+  product_id INT(11),
+  supplier_id INT(11)
+)
+----
+
+2. Inicialitza la taula creada a l'apartat anterior amb les dades que hi ha a
+`products`:
++
+--
+a. Per cada producte, si `supplier_ids` no conté un punt i coma, agafa la
+cadena completa com a identificador del proveïdor.
++
+[source,sql]
+----
+INSERT INTO product_supplier
+SELECT id, supplier_ids
+FROM products
+WHERE supplier_ids NOT LIKE '%;%'
+----
+
+b. Per cada producte, si `supplier_ids` conté un punt i coma, agafa el primer
+caràcter com un identificador del proveïdor, i agafa l'últim caràcter com un
+altre identificador d'un altre proveïdor.
++
+[source,sql]
+----
+INSERT INTO product_supplier
+SELECT id, LEFT(supplier_ids, 1)
+FROM products
+WHERE supplier_ids LIKE '%;%'
+
+INSERT INTO product_supplier
+SELECT id, RIGHT(supplier_ids, 1)
+FROM products
+WHERE supplier_ids LIKE '%;%'
+----
+--
+
+3. Esborra la columna `supplier_ids` de `products`.
++
+[source,sql]
+----
+ALTER TABLE products DROP COLUMN supplier_ids
+----
+
+4. Afegeix la clau primària i les claus foranes a la nova taula.
++
+[source,sql]
+----
+ALTER TABLE product_supplier
+ADD PRIMARY KEY (product_id, supplier_id)
+
+ALTER TABLE product_supplier
+ADD CONSTRAINT FOREIGN KEY (product_id) REFERENCES products(id)
+ON DELETE CASCADE ON UPDATE CASCADE
+
+ALTER TABLE product_supplier
+ADD CONSTRAINT FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
+ON DELETE CASCADE ON UPDATE CASCADE
+----
+
+La segona modificació que volem fer és afegir la informació sobre l'IVA als
+productes i comandes.
+
+[start=5]
+5. Afegeix la columna `IVA` a la taula `products`. Fes que tingui un valor per
+defecte de 10.
++
+[source,sql]
+----
+ALTER TABLE products ADD COLUMN IVA DECIMAL(4,2) UNSIGNED NOT NULL DEFAULT 10
+----
+
+6. Les categories de cereals i gra tenen un IVA del 4%. La cervesa té un IVA del
+21%.
++
+[source,sql]
+----
+UPDATE products SET IVA=4 WHERE category IN ('Cereal', 'Grains')
+
+UPDATE products SET IVA=21 WHERE product_name LIKE '%Beer%'
+----
+
+7. Afegeix el camp `price_before_IVA` a `products`. Inicialitza'l restant l'IVA
+a `list_price`.
++
+[source,sql]
+----
+ALTER TABLE products ADD COLUMN price_before_IVA DECIMAL(19,4) NOT NULL DEFAULT 0
+
+UPDATE products SET price_before_IVA = list_price-list_price*IVA/100
+----
+
+8. Afegeix el camp `IVA` a la taula `order_details` i inicialitza'l d'acord al
+producte.
++
+[source,sql]
+----
+ALTER TABLE order_details ADD COLUMN IVA DECIMAL(4,2) UNSIGNED NOT NULL DEFAULT 10
+
+UPDATE order_details SET IVA=
+  (SELECT IVA FROM products p WHERE p.id=product_id)
+----
+
+9. Afegeix el camp `unit_price_before_IVA` a `order_details`. Inicialitza'l al
+preu adequat.
++
+[source,sql]
+----
+ALTER TABLE order_details ADD COLUMN unit_price_before_IVA DECIMAL(19,4) DEFAULT 0
+
+UPDATE order_details SET unit_price_before_IVA =
+  (SELECT price_before_IVA FROM products p WHERE p.id=product_id)
+----
